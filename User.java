@@ -1,4 +1,4 @@
-public class User {
+public abstract class User {
     private String userId;
     private String name;
     private String password = "password";
@@ -16,9 +16,7 @@ public class User {
 
 
     // methods - to be abstract?
-    public void login(String userId) {
-        isLoggedIn = true;
-    }
+    public abstract void login();
 
     public void logout() {
         isLoggedIn = false;

@@ -1,6 +1,7 @@
 public class Student extends User {
     private int yearOfStudy;
     private String major;
+    private Internship internship;
 
     public Student(String id, String name, String email, int year, String major) {
         super(id, name, email);

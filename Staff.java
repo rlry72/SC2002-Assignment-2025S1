@@ -7,4 +7,6 @@ public class Staff extends User {
         this.role = role;
         this.dept = dept;
     }
+
+    
 }
