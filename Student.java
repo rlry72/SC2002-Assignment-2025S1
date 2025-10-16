@@ -2,11 +2,11 @@ public class Student extends User {
     private int yearOfStudy;
     private String major;
 
-    public Student(String id, String n, int year, String maj) {
-        super(id, n);
+    public Student(String id, String name, String email, int year, String major) {
+        super(id, name, email);
         yearOfStudy = year;
-        major = maj;
+        this.major = major;
     }
 
-    // apply for internship (max 3) ->
+    // apply for internship (max 3) -> need internship class?
 }
