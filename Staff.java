@@ -10,6 +10,10 @@ public class Staff extends User {
         this.dept = dept;
     }
 
+    public String getLoginId() {
+        return super.getUserId();
+    }
+
     // might be replaced with more secure system if possible
     @Override
     public void login() {

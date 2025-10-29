@@ -64,4 +64,6 @@ public abstract class User {
             return true;
         return false;
     }
+
+    public abstract String getLoginId();
 }

@@ -23,7 +23,7 @@ public class LoginManager {
         if (userType.equals("Student")) {
             System.out.print("Please enter your user ID: ");            
         } else if (userType.equals("Staff")) {
-            System.out.print("Please enter your Staff email: ");
+            System.out.print("Please enter your Staff ID: ");
         } else if (userType.equals("Company Representative")) {
             System.out.print("Please enter your Company email: ");
         } else {
@@ -34,7 +34,7 @@ public class LoginManager {
         System.out.print("Please enter your password: ");
         password = sc.nextLine();
         for (User user : users) {
-            if (user.getUserId().equals(id)) {
+            if (user.getLoginId().equals(id)) {
                 if (user.validatePassword(password) && user.getClass().getSimpleName().equals(userType)) {
                 System.out.println("Logging in as " + user.getClass().getSimpleName());
                 System.out.println("ID: " + user.getUserId() + ", Name: " + user.getName());

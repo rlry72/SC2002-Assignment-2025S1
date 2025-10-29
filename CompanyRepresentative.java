@@ -16,6 +16,10 @@ public class CompanyRepresentative extends User {
         isApproved = false;
     }
 
+    public String getLoginId() {
+        return super.getEmail();
+    }
+
     @Override
     public void login() {
         String email;

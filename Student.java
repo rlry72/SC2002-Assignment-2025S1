@@ -19,6 +19,10 @@ public class Student extends User {
         else
             return false;
     }
+
+    public String getLoginId() {
+        return super.getUserId();
+    }
     
     // apply for internship (max 3) -> need internship class?
 }
