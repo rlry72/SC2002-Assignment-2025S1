@@ -14,9 +14,8 @@ public class InternshipPlacementManagementSystem {
         
         Scanner sc = new Scanner(System.in);
 
-        System.out.print("Login: please enter user type: ");
-        String userType = sc.nextLine();
-        currentLoggedInUser = loginManager.login(userType);
+        // String userType = sc.nextLine();
+        currentLoggedInUser = loginManager.login();
 
         if (currentLoggedInUser != null)
             System.out.println("Current logged in user: Type: " + currentLoggedInUser.getClass().getSimpleName() + ", Name: " + currentLoggedInUser.getName() + ", is logged in: " + currentLoggedInUser.isLoggedIn());
