@@ -25,7 +25,8 @@ public abstract class User {
     }
 
     public void changePassword(String newPw) {
-        this.password = newPw;
+        if (isLoggedIn)
+            this.password = newPw;
     }
 
     public String getEmail() {
@@ -34,9 +35,9 @@ public abstract class User {
     public String getName() {
         return name;
     }
-    public String getPassword() {
-        return password;
-    }
+    // public String getPassword() {
+    //     return password;
+    // }
     public String getUserId() {
         return userId;
     }
@@ -56,5 +57,11 @@ public abstract class User {
 
     public void setLoggedIn(boolean isLoggedIn) {
         this.isLoggedIn = isLoggedIn;
+    }
+
+    public boolean validatePassword(String pw) {
+        if (this.password.equals(pw))
+            return true;
+        return false;
     }
 }

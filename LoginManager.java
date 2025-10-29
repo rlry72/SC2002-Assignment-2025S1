@@ -29,7 +29,7 @@ public class LoginManager {
         password = sc.nextLine();
         for (User user : users) {
             if (user.getUserId().equals(id)) {
-                if (user.getPassword().equals(password) && user.getClass().getSimpleName().equals(userType)) {
+                if (user.validatePassword(password) && user.getClass().getSimpleName().equals(userType)) {
                 System.out.println("Logging in as " + user.getClass().getSimpleName());
                 System.out.println("ID: " + user.getUserId() + ", Name: " + user.getName());
                 foundUser = user;
