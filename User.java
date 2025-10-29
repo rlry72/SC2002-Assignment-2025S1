@@ -16,7 +16,9 @@ public abstract class User {
 
 
     // methods - to be abstract?
-    public abstract void login();
+    public void login() {
+        
+    };
 
     public void logout() {
         isLoggedIn = false;
@@ -24,5 +26,35 @@ public abstract class User {
 
     public void changePassword(String newPw) {
         this.password = newPw;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+    public String getName() {
+        return name;
+    }
+    public String getPassword() {
+        return password;
+    }
+    public String getUserId() {
+        return userId;
+    }
+    public void setEmail(String email) {
+        this.email = email;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public boolean isLoggedIn() {
+        return isLoggedIn;
+    }
+
+    public void setLoggedIn(boolean isLoggedIn) {
+        this.isLoggedIn = isLoggedIn;
     }
 }
