@@ -3,8 +3,10 @@ package controller;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import model.Internship;
+import model.InternshipApplication;
 import model.Student;
 import repository.InternshipAppRepository;
 import repository.InternshipRepository;
@@ -40,8 +42,32 @@ public class StudentController {
             return true;
     }
 
-    public void apply(Student student, Internship internship) {
-        
+    public void applyInternship(Student student, Internship internship) {
+        long studentActiveAppCount = applications.findByStudent(student.getUserId()).stream()
+            .filter(application -> application.getStatus() == InternshipApplication.Status.PENDING || application.getStatus() == InternshipApplication.Status.SUCCESSFUL)
+            .count();
+
+        if (studentActiveAppCount > 3)
+            throw new IllegalStateException("Maximum of 3 active Internship Applications allowed!");
+
+            InternshipApplication application = new InternshipApplication(UUID.randomUUID().toString(), student.getUserId(), internship.getId());
+            
+            applications.save(application);
+    }
+
+    public void acceptInternship(Student student, InternshipApplication internshipApplication, Internship internship) {
+        internshipApplication.setStatus(InternshipApplication.Status.SUCCESSFUL);
+
+        internship.addConfirmedSlot();
+        applications.save(internshipApplication);
+        internships.save(internship);
+
+        for (InternshipApplication otherApplications : applications.findByStudent(student.getUserId())) {
+            if (!otherApplications.getId().equals(internshipApplication.getId())) {
+                otherApplications.setStatus(InternshipApplication.Status.WITHDRAWN);
+                applications.save(otherApplications);
+            }
+        }
     }
     
 }

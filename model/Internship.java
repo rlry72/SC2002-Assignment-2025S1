@@ -113,5 +113,13 @@ public class Internship {
         return !today.isBefore(startDate) && !today.isAfter(endDate);
     }
 
-    
+    public void addConfirmedSlot() {
+    if (confirmedSlots < maxSlots) {
+        confirmedSlots++;
+
+        if (confirmedSlots == maxSlots) {
+            this.status = Status.FILLED;
+        }
+    }
+}
 }
