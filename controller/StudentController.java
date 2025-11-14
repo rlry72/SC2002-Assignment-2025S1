@@ -43,6 +43,8 @@ public class StudentController {
     }
 
     public void applyInternship(Student student, Internship internship) {
+        if (internship.getStatus() != Internship.Status.APPROVED) 
+            throw new IllegalArgumentException("This internship is not approved yet!");
         long studentActiveAppCount = applications.findByStudent(student.getUserId()).stream()
             .filter(application -> application.getStatus() == InternshipApplication.Status.PENDING || application.getStatus() == InternshipApplication.Status.SUCCESSFUL)
             .count();
@@ -75,5 +77,7 @@ public class StudentController {
             }
         }
     }
+
+
     
 }
