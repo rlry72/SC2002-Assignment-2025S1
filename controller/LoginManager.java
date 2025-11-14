@@ -1,6 +1,9 @@
+package controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import model.User;
 
 public class LoginManager {
     List<User> users;

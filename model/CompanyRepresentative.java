@@ -1,4 +1,4 @@
-import java.util.Scanner;
+package model;
 
 public class CompanyRepresentative extends User {
     private Company c;
@@ -16,16 +16,30 @@ public class CompanyRepresentative extends User {
         isApproved = false;
     }
 
+    public String getDept() {
+        return dept;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public int getNoOfInternships() {
+        return noOfInternships;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean isApproved) {
+        this.isApproved = isApproved;
+    }
+
+    @Override
     public String getLoginId() {
         return super.getEmail();
     }
 
-    @Override
-    public void login() {
-        String email;
-        String username;
-        Scanner sc = new Scanner(System.in);
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'login'");
-    }
+
 }
