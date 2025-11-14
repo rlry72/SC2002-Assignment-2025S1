@@ -17,7 +17,7 @@ public class InternshipApplication {
         this.id = id;
         this.studentId = studentId;
         this.internshipId = internshipId;
-        this.status = status.PENDING;
+        this.status = Status.PENDING;
         this.studentAccepted = false;
     }
 
@@ -39,6 +39,10 @@ public class InternshipApplication {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public boolean studentAccepted() {
+        return this.studentAccepted;
     }
 
     public void accept() {

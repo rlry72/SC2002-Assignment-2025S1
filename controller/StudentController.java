@@ -56,10 +56,16 @@ public class StudentController {
     }
 
     public void acceptInternship(Student student, InternshipApplication internshipApplication, Internship internship) {
-        internshipApplication.setStatus(InternshipApplication.Status.SUCCESSFUL);
+        if (!internshipApplication.getStudentId().equals(student.getUserId()))
+            throw new IllegalArgumentException("This application does not belong to you!");
+        if (internshipApplication.getStatus() != InternshipApplication.Status.SUCCESSFUL)
+            throw new IllegalArgumentException("You can only accept applications that are successful.");
+        if (internshipApplication.studentAccepted())
+            throw new IllegalArgumentException("This application has already been accepted.");
 
-        internship.addConfirmedSlot();
+        internshipApplication.accept();
         applications.save(internshipApplication);
+        internship.addConfirmedSlot();
         internships.save(internship);
 
         for (InternshipApplication otherApplications : applications.findByStudent(student.getUserId())) {
