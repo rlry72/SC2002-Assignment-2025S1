@@ -1,3 +1,4 @@
+package view;
 
 import java.util.Scanner;
 
@@ -5,10 +6,9 @@ import controller.LoginManager;
 import model.Student;
 import model.User;
 
-public class StudentMain {
-    public static void StudentMain(User user) {
+public class StudentMenu {
+    public static void StudentMainMenu(User user) {
 
-        LoginManager lm = null;
         Scanner sc = new Scanner(System.in);
 
         if (user instanceof Student) {
@@ -28,7 +28,7 @@ public class StudentMain {
                 case 1 -> System.out.println("view and apply");
                 case 2 -> System.out.println("view int apps");
                 case 3 -> System.out.println("view profile");
-                case 4 -> lm.changePassword(user);
+                case 4 -> System.out.println("change password");
                 case 5 -> System.out.println("logout");
             }
 
