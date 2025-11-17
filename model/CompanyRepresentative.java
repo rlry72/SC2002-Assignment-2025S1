@@ -41,5 +41,9 @@ public class CompanyRepresentative extends User {
         return super.getEmail();
     }
 
+    public Company getCompany() {
+        return this.c;
+    }
+
 
 }

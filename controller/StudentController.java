@@ -35,6 +35,14 @@ public class StudentController {
             .toList();
     }
 
+    public List<InternshipApplication> getInternshipApplications(Student s) {
+        return applications.findByStudent(s.getUserId());
+    }
+
+    public Internship getInternshipById(String internshipId) {
+        return internships.findById(internshipId).orElse(null);
+    }
+
     private boolean isLevelAllowed(Student student, Internship internship) {
         if (student.getYearOfStudy() < 3 && internship.getLevel() != Internship.Level.BASIC)
             return false;
@@ -78,6 +86,21 @@ public class StudentController {
         }
     }
 
+    public void withdrawFromInternship(Student student, InternshipApplication application) {
+        if (!application.getStudentId().equals(student.getUserId())) {
+            throw new IllegalStateException("You can only withdraw from Internship applications made by you.");
+        }
 
+        if (application.getStatus() == InternshipApplication.Status.WITHDRAWN || application.getStatus() == InternshipApplication.Status.UNSUCCESSFUL) {
+            throw new IllegalStateException("This Internship application cannot be withdrawn from.");
+        }
+
+        if (application.getStatus() == InternshipApplication.Status.PENDING || application.getStatus() == InternshipApplication.Status.SUCCESSFUL) {
+            application.requestWithdrawal();
+            return;
+        }
+
+
+    }
     
 }

@@ -10,6 +10,7 @@ import model.User;
 
 public interface UserRepository {
     Optional<User> findById(String id);
+    Optional<User> findByLoginId(String loginId);
     void save(User user);
     boolean exists(String id);
     List<Student> getAllStudents();

@@ -12,6 +12,7 @@ public class InternshipApplication {
     }
     private Status status;
     private boolean studentAccepted;
+    private boolean withdrawalRequested;
 
     public InternshipApplication(String id, String studentId, String internshipId) {
         this.id = id;
@@ -19,6 +20,7 @@ public class InternshipApplication {
         this.internshipId = internshipId;
         this.status = Status.PENDING;
         this.studentAccepted = false;
+        this.withdrawalRequested = false;
     }
 
     public String getId() {
@@ -49,6 +51,10 @@ public class InternshipApplication {
         this.studentAccepted = true;
     }
 
+    public void withdraw() {
+        this.status = Status.WITHDRAWN;
+    }
+
     public boolean isActive() {
         return status == Status.PENDING || status == Status.SUCCESSFUL;
     }
@@ -57,4 +63,20 @@ public class InternshipApplication {
         return status == Status.PENDING;
     }
 
+    public boolean isWithdrawalRequested() {
+        return withdrawalRequested;
+    }
+
+    public void requestWithdrawal() {
+        this.withdrawalRequested = true;
+    }
+    
+    @Override
+    public String toString() {
+        return "ApplicationID=" + id +
+               ", Student=" + studentId +
+               ", Internship=" + internshipId +
+               ", Status=" + status +
+               ", Accepted=" + studentAccepted;
+    }
 }

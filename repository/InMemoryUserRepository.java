@@ -45,5 +45,10 @@ public class InMemoryUserRepository implements UserRepository{
             .map(u -> (Staff) u)
             .toList();
     }
+
+    @Override
+    public Optional<User> findByLoginId(String loginId) {
+        return users.values().stream().filter(u -> u.getLoginId().equals(loginId)).findFirst();
+    }
     
 }

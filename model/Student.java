@@ -1,5 +1,5 @@
 package model;
-import java.util.Scanner;
+// import java.util.Scanner;
 
 public class Student extends User {
     private int yearOfStudy;
@@ -35,37 +35,31 @@ public class Student extends User {
 
     @Override
     public String getEmail() {
-        // TODO Auto-generated method stub
         return super.getEmail();
     }
 
     @Override
     public String getName() {
-        // TODO Auto-generated method stub
         return super.getName();
     }
 
     @Override
     public String getUserId() {
-        // TODO Auto-generated method stub
         return super.getUserId();
     }
     
     @Override
     public void setEmail(String email) {
-        // TODO Auto-generated method stub
         super.setEmail(email);
     }
 
     @Override
     public void setName(String name) {
-        // TODO Auto-generated method stub
         super.setName(name);
     }
 
     @Override
     public void setUserId(String userId) {
-        // TODO Auto-generated method stub
         super.setUserId(userId);
     }
 
@@ -75,6 +69,14 @@ public class Student extends User {
 
     public void setYearOfStudy(int yearOfStudy) {
         this.yearOfStudy = yearOfStudy;
+    }
+
+    public Internship getInternship() {
+        return internship;
+    }
+
+    public void setInternship(Internship internship) {
+        this.internship = internship;
     }
     // apply for internship (max 3) -> need internship class?
 }

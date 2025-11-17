@@ -5,29 +5,22 @@ public abstract class User {
     private String password = "password";
     private String email;
 
-    private boolean isLoggedIn;
+    private boolean isLoggedIn = false;
 
     public User(String id, String n, String email) {
         userId = id;
         name = n;
-        // password = pw;
         this.email = email;
-        isLoggedIn = false;
     }
 
 
     // methods - to be abstract?
     public void login() {
-        
+        this.isLoggedIn = true;
     };
 
     public void logout() {
         isLoggedIn = false;
-    }
-
-    public void changePassword(String newPw) {
-        if (isLoggedIn)
-            this.password = newPw;
     }
 
     public String getEmail() {
@@ -61,9 +54,14 @@ public abstract class User {
     }
 
     public boolean validatePassword(String pw) {
-        if (this.password.equals(pw))
-            return true;
-        return false;
+        return this.password.equals(pw);
+    }
+
+    public boolean changePassword(String newPw) {
+        if (!isLoggedIn)
+            return false;
+        this.password = newPw;
+        return true;
     }
 
     public abstract String getLoginId();

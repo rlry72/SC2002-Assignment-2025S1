@@ -22,7 +22,7 @@ public class Internship {
     private Company company;
 
     public Internship(String id, String title, String desc, Level level, String major, LocalDate startDate, 
-        LocalDate endDate, Status status, CompanyRepresentative cr, int slots, boolean isVisible, Company company) {
+        LocalDate endDate, CompanyRepresentative cr, int slots, boolean isVisible, Company company) {
         this.id = id;
         this.title = title;
         this.desc = desc;
@@ -30,7 +30,7 @@ public class Internship {
         this.major = major;
         this.startDate = startDate;
         this.endDate = endDate;
-        this.status = status;
+        this.status = Status.PENDING;
         this.cr = cr;
         this.maxSlots = Math.min(10, Math.max(1, slots));
         this.isVisible = isVisible;
@@ -114,12 +114,21 @@ public class Internship {
     }
 
     public void addConfirmedSlot() {
-    if (confirmedSlots < maxSlots) {
-        confirmedSlots++;
+        if (confirmedSlots < maxSlots) {
+            confirmedSlots++;
 
-        if (confirmedSlots == maxSlots) {
-            this.status = Status.FILLED;
+            if (confirmedSlots == maxSlots) {
+                this.status = Status.FILLED;
+            }
         }
+
     }
-}
+    
+    public boolean isFull() {
+        return this.status == Status.FILLED;
+    }
+
+    public int getRemainingSlots() {
+        return maxSlots - confirmedSlots;
+    }
 }

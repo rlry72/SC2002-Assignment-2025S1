@@ -1,5 +1,6 @@
 package repository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,16 @@ public class InMemoryInternshipAppRepository implements InternshipAppRepository{
     @Override
     public void delete(String appId) {
         internshipApps.remove(appId);
+    }
+
+    @Override
+    public List<InternshipApplication> findAll() {
+        return new ArrayList<>(internshipApps.values());
+    }
+
+    @Override
+    public List<InternshipApplication> findWithdrawalRequests() {
+        return internshipApps.values().stream().filter(InternshipApplication::isWithdrawalRequested).toList();
     }
 
 }
