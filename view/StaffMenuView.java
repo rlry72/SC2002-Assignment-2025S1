@@ -8,21 +8,22 @@ import model.*;
 
 public class StaffMenuView {
     private final StaffController staffController;
-    private final StaffReportView reportView;
+    private final InternshipBrowserView browserView;   // <-- Added
     private static final Scanner sc = new Scanner(System.in);
 
-    public StaffMenuView(StaffController staffController) {
+    public StaffMenuView(StaffController staffController,
+                         InternshipBrowserView browserView) {
         this.staffController = staffController;
-        this.reportView = new StaffReportView(staffController);
+        this.browserView = browserView;
     }
 
     public void displayStaffMenu(Staff staff) {
         while (true) {
             System.out.println("\n========= Staff Menu =========");
-            System.out.println("1. Approve/Reject company representatives");
-            System.out.println("2. Approve/Reject internship postings");
-            System.out.println("3. Approve/Reject withdrawal requests");
-            System.out.println("4. Generate Internship Opportunities reports");
+            System.out.println("1. Approve / Reject company representatives");
+            System.out.println("2. Approve / Reject internship postings");
+            System.out.println("3. Approve / Reject withdrawal requests");
+            System.out.println("4. View / Filter / Report internships"); // now browser
             System.out.println("5. Change password");
             System.out.println("6. Logout");
 
@@ -32,7 +33,7 @@ public class StaffMenuView {
                 case 1 -> manageCompanyReps();
                 case 2 -> manageInternships();
                 case 3 -> manageWithdrawals();
-                case 4 -> reportView.displayReportMenu();
+                case 4 -> browserView.show(staff);   // <-- uses shared browser
                 case 5 -> changePassword(staff);
                 case 6 -> { return; }
             }
@@ -81,32 +82,24 @@ public class StaffMenuView {
             return;
         }
 
-        System.out.printf("%-4s %-15s %-22s %-15s %-10s%n",
-                "No.", "ID", "Title", "Company", "Level");
-
+        System.out.printf("%-4s %-25s %-20s %-10s%n", "No.", "Title", "Company", "Level");
         for (int i = 0; i < internships.size(); i++) {
-            Internship internship = internships.get(i);
-            System.out.printf("%-4d %-15s %-22s %-15s %-10s%n",
-                    (i + 1),
-                    internship.getId(),
-                    internship.getTitle(),
-                    internship.getCompanyName(),
-                    internship.getLevel());
+            Internship in = internships.get(i);
+            System.out.printf("%-4d %-25s %-20s %-10s%n",
+                    i + 1, in.getTitle(), in.getCompanyName(), in.getLevel());
         }
 
-        int index = ConsoleUtil.readInt("Select index of Internship to manage, 0 to cancel: ", 0, internships.size());
-        if (index == 0)
-            return;
+        int index = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, internships.size());
+        if (index == 0) return;
 
-        Internship selectedInternship = internships.get(index - 1);
-        System.out.println("1 = Approve, 2 = Reject");
-        int decision = ConsoleUtil.readInt("Choose: ", 1, 2);
+        Internship selected = internships.get(index - 1);
+        int decision = ConsoleUtil.readInt("1 = Approve, 2 = Reject: ", 1, 2);
 
         if (decision == 1) {
-            staffController.approveInternship(selectedInternship);
+            staffController.approveInternship(selected);
             System.out.println("Approved internship.");
         } else {
-            staffController.rejectInternship(selectedInternship);
+            staffController.rejectInternship(selected);
             System.out.println("Rejected internship.");
         }
     }
@@ -114,77 +107,85 @@ public class StaffMenuView {
     private void manageWithdrawals() {
         List<InternshipApplication> applications = staffController.getWithdrawalRequests();
         if (applications.isEmpty()) {
-            System.out.println("No withdrawl requests.");
+            System.out.println("No withdrawal requests.");
             return;
         }
 
-        System.out.printf("%-4s %-15s %-15s %-15s %-12s%n",
-                "No.", "ApplicationID", "StudentID", "InternshipID", "Status");
+        System.out.printf("%-4s %-18s %-25s %-12s%n",
+                "No.", "Student", "Internship", "Status");
 
         for (int i = 0; i < applications.size(); i++) {
             InternshipApplication a = applications.get(i);
-            System.out.printf("%-4d %-15s %-15s %-15s %-12s%n",
-                    (i + 1), a.getId(), a.getStudentId(), a.getInternshipId(), a.getStatus());
+
+            // Fetch readable details instead of UUIDs
+            String studentName = staffController.getStudentName(a.getStudentId());
+            String internshipTitle = staffController.getInternshipTitle(a.getInternshipId());
+
+            System.out.printf("%-4d %-18s %-25s %-12s%n",
+                    (i + 1), studentName, internshipTitle, a.getStatus());
         }
 
-        int index = ConsoleUtil.readInt("Select index of Internship Application to manage, 0 to cancel: ", 0, applications.size());
-        if (index == 0)
-            return;
+        int index = ConsoleUtil.readInt("Select application to manage, 0 to cancel: ",
+                                        0, applications.size());
+        if (index == 0) return;
 
-        InternshipApplication selectedApplication = applications.get(index - 1);
+        InternshipApplication selected = applications.get(index - 1);
+
         System.out.println("1 = Approve, 2 = Reject");
         int decision = ConsoleUtil.readInt("Choose: ", 1, 2);
 
         if (decision == 1) {
-            staffController.approveWithdrawal(selectedApplication);
-            System.out.println("Approved withdrawal.");
+            staffController.approveWithdrawal(selected);
+            System.out.println("Withdrawal approved.");
         } else {
-            staffController.rejectWithdrawal(selectedApplication);
-            System.out.println("Rejected withdrawal.");
+            staffController.rejectWithdrawal(selected);
+            System.out.println("Withdrawal rejected.");
         }
     }
 
-    private void printReportTable(List<Internship> internships) {
-        System.out.printf("%-12s %-20s %-15s %-10s %-8s %-12s %-18s %-20s%n",
-            "ID","Title","Company","Level","Major","Status","Remaining Slots","Representative");
 
-        for (Internship i : internships) {
-            System.out.printf("%-12s %-20s %-15s %-10s %-8s %-12s %-18s %-20s%n",
-                    i.getId(),
-                    i.getTitle(),
-                    i.getCompany().getCompanyName(),
-                    i.getLevel(),
-                    i.getMajor(),
-                    i.getStatus(),
-                    i.getRemainingSlots(),
-                    i.getCr().getName()
-            );
-        }
-    }
+    // private void printReportTable(List<Internship> internships) {
+    //     System.out.printf("%-12s %-20s %-15s %-10s %-8s %-12s %-18s %-20s%n",
+    //         "ID","Title","Company","Level","Major","Status","Remaining Slots","Representative");
 
-    private void printInternshipTable(List<Internship> list) {
-    System.out.printf("%-10s %-18s %-15s %-15s %-10s %-10s %-12s %-8s\n",
-            "ID","Title","Company","Rep","Level","Remaining","Status","Major");
+    //     for (Internship i : internships) {
+    //         System.out.printf("%-12s %-20s %-15s %-10s %-8s %-12s %-18s %-20s%n",
+    //                 i.getId(),
+    //                 i.getTitle(),
+    //                 i.getCompany().getCompanyName(),
+    //                 i.getLevel(),
+    //                 i.getMajor(),
+    //                 i.getStatus(),
+    //                 i.getRemainingSlots(),
+    //                 i.getCr().getName()
+    //         );
+    //     }
+    // }
 
-    for (Internship i : list) {
-        System.out.printf("%-10s %-18s %-15s %-15s %-10s %-10s %-12s %-8s\n",
-                i.getId(),
-                i.getTitle(),
-                i.getCompanyName(),
-                i.getCr().getUserId(),
-                i.getLevel(),
-                i.getRemainingSlots() + "/" + i.getMaxSlots(),
-                i.getStatus(),
-                i.getMajor()
-        );
-        }
-    }   
+    // private void printInternshipTable(List<Internship> list) {
+    // System.out.printf("%-10s %-18s %-15s %-15s %-10s %-10s %-12s %-8s\n",
+    //         "ID","Title","Company","Rep","Level","Remaining","Status","Major");
+
+    // for (Internship i : list) {
+    //     System.out.printf("%-10s %-18s %-15s %-15s %-10s %-10s %-12s %-8s\n",
+    //             i.getId(),
+    //             i.getTitle(),
+    //             i.getCompanyName(),
+    //             i.getCr().getUserId(),
+    //             i.getLevel(),
+    //             i.getRemainingSlots() + "/" + i.getMaxSlots(),
+    //             i.getStatus(),
+    //             i.getMajor()
+    //     );
+    //     }
+    // }   
 
     // private void openReportMenu() {
     //     StaffReportView reportView = new StaffReportView(staffController);
     //     reportView.displayReportMenu();
     // }
 
+    
 
     private void changePassword(Staff s) {
         System.out.print("Please enter new password: ");

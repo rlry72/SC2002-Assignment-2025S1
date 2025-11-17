@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import model.Internship;
-import model.Internship.Level;
 import model.Internship.Status;
 import model.InternshipFilter;
 

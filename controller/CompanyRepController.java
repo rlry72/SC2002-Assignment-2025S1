@@ -1,6 +1,7 @@
 package controller;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -8,6 +9,7 @@ import model.Company;
 import model.CompanyRepresentative;
 import model.Internship;
 import model.InternshipApplication;
+import model.InternshipFilter;
 import repository.CompanyRepository;
 import repository.InternshipAppRepository;
 import repository.InternshipRepository;
@@ -97,4 +99,12 @@ public class CompanyRepController {
         users.save(rep);
         return rep;
     }
+
+    public List<Internship> getOwnInternshipsFiltered(CompanyRepresentative rep, InternshipFilter filter) {
+        return internships.filter(filter).stream()
+            .filter(i -> i.getCr().getUserId().equalsIgnoreCase(rep.getUserId()))
+            .sorted(Comparator.comparing(Internship::getTitle))
+            .toList();
+    }
+
 }

@@ -10,6 +10,8 @@ import model.CompanyRepresentative;
 import model.Internship;
 import model.InternshipApplication;
 import model.InternshipFilter;
+import model.Student;
+import model.User;
 import repository.InternshipAppRepository;
 import repository.InternshipRepository;
 import repository.UserRepository;
@@ -135,6 +137,26 @@ public class StaffController {
     public List<Internship> filterByRepresentative(String repId) {
         return internships.filter(new InternshipFilter().setRepId(repId));
     }
+
+    public List<Internship> getFiltered(InternshipFilter filter) {
+        return internships.filter(filter).stream()
+            .sorted(Comparator.comparing(Internship::getTitle))
+            .toList();
+    }
+
+    public String getStudentName(String studentId) {
+        return users.findById(studentId)
+                .filter(u -> u instanceof Student)
+                .map(User::getName)
+                .orElse("Unknown Student");
+    }
+
+    public String getInternshipTitle(String internshipId) {
+        return internships.findById(internshipId)
+                .map(Internship::getTitle)
+                .orElse("Unknown Internship");
+    }
+
 
 }
 

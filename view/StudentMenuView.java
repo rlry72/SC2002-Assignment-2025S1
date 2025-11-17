@@ -9,11 +9,13 @@ import model.*;
 
 public class StudentMenuView {
     private final StudentController studentController;
+    private final InternshipBrowserView browserView;
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final Scanner sc = new Scanner(System.in);
 
-    public StudentMenuView(StudentController studentController) {
+    public StudentMenuView(StudentController studentController, InternshipBrowserView browserView) {
         this.studentController = studentController;
+        this.browserView = browserView;
     }
 
      public void displayStudentMenu(Student student) {
@@ -42,13 +44,14 @@ public class StudentMenuView {
     }
 
     private void viewEligible(Student s) {
-        List<Internship> internshipList = studentController.getEligibleInternships(s);
-        if (internshipList.isEmpty()) {
-            System.out.println("No eligible internships!");
-            return;
-        }
+        // List<Internship> internshipList = studentController.getEligibleInternships(s);
+        // if (internshipList.isEmpty()) {
+        //     System.out.println("No eligible internships!");
+        //     return;
+        // }
 
-        printInternships(internshipList);
+        // printInternships(internshipList);
+        browserView.show(s);
     }
 
     private void viewApplications(Student s) {
@@ -61,8 +64,11 @@ public class StudentMenuView {
     }
 
     private void apply(Student s) {
-        List<Internship> internshipList = studentController.getEligibleInternships(s);
-        if (internshipList.isEmpty()) {
+
+        browserView.show(s); // let student view & update filters
+        List<Internship> internshipList = browserView.getLastResults(s);
+
+        if (internshipList == null || internshipList.isEmpty()) {
             System.out.println("No internships are currently available.");
             return;
         }
@@ -70,17 +76,40 @@ public class StudentMenuView {
         printInternships(internshipList);
 
         int choice = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, internshipList.size());
-        if (choice == 0)
-            return;
-        
-        Internship selectedInternship = internshipList.get(choice - 1);
+        if (choice == 0) return;
+
+        Internship selected = internshipList.get(choice - 1);
+
         try {
-            studentController.applyInternship(s, selectedInternship);
-            System.out.println("Internship Application submitted.");
+            studentController.applyInternship(s, selected);
+            System.out.println("Application submitted.");
         } catch (IllegalStateException e) {
             System.out.println("Unable to apply: " + e.getMessage());
         }
     }
+
+
+    // private void apply(Student s) {
+    //     List<Internship> internshipList = studentController.getEligibleInternships(s);
+    //     if (internshipList.isEmpty()) {
+    //         System.out.println("No internships are currently available.");
+    //         return;
+    //     }
+
+    //     printInternships(internshipList);
+
+    //     int choice = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, internshipList.size());
+    //     if (choice == 0)
+    //         return;
+        
+    //     Internship selectedInternship = internshipList.get(choice - 1);
+    //     try {
+    //         studentController.applyInternship(s, selectedInternship);
+    //         System.out.println("Internship Application submitted.");
+    //     } catch (IllegalStateException e) {
+    //         System.out.println("Unable to apply: " + e.getMessage());
+    //     }
+    // }
 
     private void accept(Student s) {
         List<InternshipApplication> applications = studentController.getInternshipApplications(s).stream()

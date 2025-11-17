@@ -13,14 +13,6 @@ public class Student extends User {
     }
 
 
-
-    public boolean checkLoginInfo(String staffId, String password) {
-        if (staffId.equals(this.getUserId()) && this.validatePassword(password))
-            return true;
-        else
-            return false;
-    }
-
     public String getLoginId() {
         return super.getUserId();
     }

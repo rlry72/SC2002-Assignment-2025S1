@@ -13,6 +13,7 @@ import repository.InternshipAppRepository;
 import repository.InternshipRepository;
 import repository.UserRepository;
 import view.CompanyRepMenuView;
+import view.InternshipBrowserView;
 import view.LoginView;
 import view.MainMenuView;
 import view.StaffMenuView;
@@ -35,14 +36,45 @@ public class AppConfig {
         CompanyRepController repController = new CompanyRepController(internshipRepo, appRepo, userRepo, companyRepo);
         StaffController staffController = new StaffController(userRepo, internshipRepo, appRepo);
 
+        // Create dedicated browser views for each role
+        InternshipBrowserView studentBrowserView = new InternshipBrowserView(
+                InternshipBrowserView.Role.STUDENT,
+                studentController,
+                repController,
+                staffController
+        );
+
+        InternshipBrowserView repBrowserView = new InternshipBrowserView(
+                InternshipBrowserView.Role.REP,
+                studentController,
+                repController,
+                staffController
+        );
+
+        InternshipBrowserView staffBrowserView = new InternshipBrowserView(
+                InternshipBrowserView.Role.STAFF,
+                studentController,
+                repController,
+                staffController
+        );
+
+
+        LoginView loginView = new LoginView(loginController);
+
+        StudentMenuView studentMenuView = new StudentMenuView(studentController, studentBrowserView);
+        CompanyRepMenuView companyRepMenuView = new CompanyRepMenuView(repController, repBrowserView);
+        StaffMenuView staffMenuView = new StaffMenuView(staffController, staffBrowserView);
+
+
         // Instantiate primary view
         MainMenuView mainMenuView = new MainMenuView(
-            new LoginView(loginController),
-            loginController,
-            new StudentMenuView(studentController),
-            new CompanyRepMenuView(repController),
-            new StaffMenuView(staffController)   // ← StaffReportView will be created here
+                loginView,
+                loginController,
+                studentMenuView,
+                companyRepMenuView,
+                staffMenuView
         );
+
 
 
         mainMenuView.start();  // launches UI

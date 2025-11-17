@@ -2,6 +2,7 @@ package view;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -9,24 +10,25 @@ import controller.CompanyRepController;
 import model.CompanyRepresentative;
 import model.Internship;
 import model.InternshipApplication;
-import repository.InternshipAppRepository;
 
 public class CompanyRepMenuView {
     private final CompanyRepController companyRepController;
+    private final InternshipBrowserView browserView;
     private static final Scanner sc = new Scanner(System.in);
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public CompanyRepMenuView(CompanyRepController companyRepController) {
+    public CompanyRepMenuView(CompanyRepController companyRepController, InternshipBrowserView browserView) {
         this.companyRepController = companyRepController;
+        this.browserView = browserView;
     }
 
     public void displayCompanyRepMenu(CompanyRepresentative rep) {
         while (true) {
             System.out.println("\n====== Company Representative Menu ======");
-            System.out.println("1. Create Internship opportunities");
-            System.out.println("2. View my created internships");
+            System.out.println("1. Create internship opportunity");
+            System.out.println("2. View / Filter my internships");
             System.out.println("3. Toggle internship visibility");
-            System.out.println("4. View applications for an internship");
+            System.out.println("4. View applications for internship");
             System.out.println("5. Approve or Reject applications");
             System.out.println("6. Change password");
             System.out.println("7. Logout");
@@ -35,7 +37,7 @@ public class CompanyRepMenuView {
 
             switch (choice) {
                 case 1 -> createInternship(rep);
-                case 2 -> viewMyInternships(rep);
+                case 2 -> browserView.show(rep);
                 case 3 -> toggleInternshipVisibility(rep);
                 case 4 -> viewApplications(rep);
                 case 5 -> approveRejectInternshipApplication(rep);
@@ -63,15 +65,38 @@ public class CompanyRepMenuView {
                             "\n3. Advanced");
         int level = ConsoleUtil.readInt("Enter Internship level (1, 2, 3): ", 1, 3);
         Internship.Level internshipLevel = Internship.Level.values()[level - 1];
-        
-        System.out.print("Enter Internship Application opening date (yyyy-MM-dd): ");
-        String openDateString = sc.nextLine().trim();
 
-        System.out.print("Enter Internship Application closing date (yyyy-MM-dd): ");
-        String closeDateString = sc.nextLine().trim();
 
-        LocalDate openDate = LocalDate.parse(openDateString, fmt);
-        LocalDate closeDate = LocalDate.parse(closeDateString, fmt);
+        LocalDate openDate = null;
+        LocalDate closeDate = null;
+
+        // ---- Ask for Opening Date ----
+        while (openDate == null) {
+            System.out.print("Enter Internship Application opening date (yyyy-MM-dd): ");
+            String input = sc.nextLine().trim();
+            try {
+                openDate = LocalDate.parse(input, fmt);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format or non-existent date. Please try again.");
+            }
+        }
+
+        // ---- Ask for Closing Date ----
+        while (closeDate == null) {
+            System.out.print("Enter Internship Application closing date (yyyy-MM-dd): ");
+            String input = sc.nextLine().trim();
+            try {
+                LocalDate parsed = LocalDate.parse(input, fmt);
+                if (parsed.isBefore(openDate)) {
+                    System.out.println("Closing date cannot be earlier than opening date. Please try again.");
+                } else {
+                    closeDate = parsed;
+                }
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format or non-existent date. Please try again.");
+            }
+        }
+
 
         int slots = ConsoleUtil.readInt("Enter number of slots available for Internship (1-10): ", 1, 10);
 
@@ -107,9 +132,9 @@ public class CompanyRepMenuView {
         
     }   
 
-    private void viewMyInternships(CompanyRepresentative rep) {
-        getInternshipList(rep);
-    }
+    // private void viewMyInternships(CompanyRepresentative rep) {
+    //     getInternshipList(rep);
+    // }
 
     private void toggleInternshipVisibility(CompanyRepresentative rep) {
         List<Internship> internshipList = getInternshipList(rep);
