@@ -4,7 +4,6 @@ public class CompanyRepresentative extends User {
     private Company c;
     private String dept;
     private String position;
-    private int noOfInternships = 5;
     private boolean isApproved;
 
     public CompanyRepresentative(String id, String name, String email, Company c, String dept, String position) {
@@ -22,10 +21,6 @@ public class CompanyRepresentative extends User {
 
     public String getPosition() {
         return position;
-    }
-
-    public int getNoOfInternships() {
-        return noOfInternships;
     }
 
     public boolean isApproved() {

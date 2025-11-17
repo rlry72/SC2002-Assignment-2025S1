@@ -1,5 +1,7 @@
 package view;
 
+import java.util.Scanner;
+
 import controller.LoginController;
 import model.*;
 
@@ -10,6 +12,8 @@ public class MainMenuView {
     private final StudentMenuView studentMenuView;
     private final CompanyRepMenuView companyRepMenuView;
     private final StaffMenuView staffMenuView;
+
+    private final Scanner sc = new Scanner(System.in);
 
     public MainMenuView(LoginView loginView,
                         LoginController loginController,
@@ -25,20 +29,42 @@ public class MainMenuView {
 
     public void start() {
         while (true) {
-            User user = loginView.showLoginScreen();
-            if (user == null) continue;
+            System.out.println("\n===== Main Menu =====");
+            System.out.println("1. Login");
+            System.out.println("2. Register as Company Representative");
+            System.out.println("0. Exit");
+            System.out.print("Enter choice: ");
 
-            if (user instanceof Student s) {
-                studentMenuView.displayStudentMenu(s);
-            } else if (user instanceof CompanyRepresentative rep) {
-                companyRepMenuView.displayCompanyRepMenu(rep);
-            } else if (user instanceof Staff staff) {
-                staffMenuView.displayStaffMenu(staff);
-            } else {
-                System.out.println("Unknown user type.");
+            String choice = sc.nextLine();
+
+            switch (choice) {
+                case "1" -> handleLogin();
+                case "2" -> companyRepMenuView.registerCompanyRep();  // <-- new call
+                case "0" -> {
+                    System.out.println("Goodbye!");
+                    return;
+                }
+                default -> System.out.println("Invalid option.");
             }
-
-            loginController.logout(user);
         }
     }
+
+    private void handleLogin() {
+        User user = loginView.showLoginScreen();
+        if (user == null) return;
+
+        if (user instanceof Student s) {
+            studentMenuView.displayStudentMenu(s);
+        } else if (user instanceof CompanyRepresentative rep) {
+            if (!rep.isApproved()) {
+                System.out.println("Your registration is pending approval by Staff.");
+            } else {
+                companyRepMenuView.displayCompanyRepMenu(rep);
+            }
+        } else if (user instanceof Staff staff) {
+            staffMenuView.displayStaffMenu(staff);
+        }
+        loginController.logout(user);
+    }
+
 }

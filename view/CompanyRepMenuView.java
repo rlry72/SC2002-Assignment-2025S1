@@ -210,4 +210,62 @@ public class CompanyRepMenuView {
                     a.getStatus());
         }
     }
+
+    public void registerCompanyRep() {
+        System.out.println("\n===== Company Representative Registration =====");
+
+        // Name
+        String name;
+        do {
+            System.out.print("Enter your full name: ");
+            name = sc.nextLine().trim();
+            if (name.isEmpty()) System.out.println("Name cannot be empty.");
+        } while (name.isEmpty());
+
+        // Email (used as login ID)
+        String email;
+        do {
+            System.out.print("Enter your company email (used as login ID): ");
+            email = sc.nextLine().trim();
+            if (!isValidEmail(email)) {
+                System.out.println("Invalid email format. Try again (example: user@company.com).");
+                email = ""; // reset
+            }
+        } while (email.isEmpty());
+
+        // Company
+        String company;
+        do {
+            System.out.print("Enter company name: ");
+            company = sc.nextLine().trim();
+            if (company.isEmpty()) System.out.println("Company cannot be empty.");
+        } while (company.isEmpty());
+
+        // Department
+        String dept;
+        do {
+            System.out.print("Enter department: ");
+            dept = sc.nextLine().trim();
+            if (dept.isEmpty()) System.out.println("Department cannot be empty.");
+        } while (dept.isEmpty());
+
+        // Position
+        String position;
+        do {
+            System.out.print("Enter position: ");
+            position = sc.nextLine().trim();
+            if (position.isEmpty()) System.out.println("Position cannot be empty.");
+        } while (position.isEmpty());
+
+        CompanyRepresentative rep = companyRepController.register(name, email, company, dept, position);
+
+        System.out.println("\nRegistration submitted successfully!");
+        System.out.println("Your account is pending approval by staff.");
+    }
+    
+    private boolean isValidEmail(String email) {
+        // Basic RFC-compliant pattern for console applications
+        return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
+    }
+
 }

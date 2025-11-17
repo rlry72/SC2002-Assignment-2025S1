@@ -8,6 +8,7 @@ import model.Company;
 import model.CompanyRepresentative;
 import model.Internship;
 import model.InternshipApplication;
+import repository.CompanyRepository;
 import repository.InternshipAppRepository;
 import repository.InternshipRepository;
 import repository.UserRepository;
@@ -16,11 +17,13 @@ public class CompanyRepController {
     private final InternshipRepository internships;
     private final InternshipAppRepository internshipApplications;
     private final UserRepository users;
+    private final CompanyRepository companies;
 
-    public CompanyRepController(InternshipRepository internshipRepo, InternshipAppRepository internshipAppRepo, UserRepository userRepo) {
+    public CompanyRepController(InternshipRepository internshipRepo, InternshipAppRepository internshipAppRepo, UserRepository userRepo, CompanyRepository companyRepo) {
         this.internships = internshipRepo;
         this.internshipApplications = internshipAppRepo;
         this.users = userRepo;
+        this.companies = companyRepo;
     }
 
     public Internship createInternship(String title, String desc, Internship.Level level, String major, 
@@ -74,6 +77,23 @@ public class CompanyRepController {
         }
 
         CompanyRepresentative rep = new CompanyRepresentative(UUID.randomUUID().toString(), name, email, company, dept, position);
+        users.save(rep);
+        return rep;
+    }
+
+    public CompanyRepresentative register(String name, String email, String companyName, String dept, String position) {
+        if (users.exists(email)) {
+            throw new IllegalStateException("An account with this email already exists.");
+        }
+
+        Company company = companies.findByName(companyName).orElseGet(() -> {
+            Company newCompany = new Company(companyName);
+            companies.save(newCompany);
+            return newCompany;
+        });
+
+        CompanyRepresentative rep = new CompanyRepresentative(email, name, email, company, dept, position);
+
         users.save(rep);
         return rep;
     }

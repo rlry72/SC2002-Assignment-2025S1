@@ -4,6 +4,8 @@ import controller.CompanyRepController;
 import controller.LoginController;
 import controller.StaffController;
 import controller.StudentController;
+import repository.CompanyRepository;
+import repository.InMemoryCompanyRepository;
 import repository.InMemoryInternshipAppRepository;
 import repository.InMemoryInternshipRepository;
 import repository.InMemoryUserRepository;
@@ -22,6 +24,7 @@ public class AppConfig {
         UserRepository userRepo = new InMemoryUserRepository();
         InternshipRepository internshipRepo = new InMemoryInternshipRepository();
         InternshipAppRepository appRepo = new InMemoryInternshipAppRepository();
+        CompanyRepository companyRepo = new InMemoryCompanyRepository();
 
         // Load initial data
         DataLoader.loadInitialUsers(userRepo);
@@ -29,7 +32,7 @@ public class AppConfig {
         // Instantiate controllers
         LoginController loginController = new LoginController(userRepo);
         StudentController studentController = new StudentController(internshipRepo, appRepo);
-        CompanyRepController repController = new CompanyRepController(internshipRepo, appRepo, userRepo);
+        CompanyRepController repController = new CompanyRepController(internshipRepo, appRepo, userRepo, companyRepo);
         StaffController staffController = new StaffController(userRepo, internshipRepo, appRepo);
 
         // Instantiate primary view
