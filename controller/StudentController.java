@@ -69,19 +69,52 @@ public class StudentController {
     }
 
     public void applyInternship(Student student, Internship internship) {
-        if (internship.getStatus() != Internship.Status.APPROVED) 
+        // Only approved internships can be applied for
+        if (internship.getStatus() != Internship.Status.APPROVED) {
             throw new IllegalArgumentException("This internship is not approved yet!");
-        long studentActiveAppCount = applications.findByStudent(student.getUserId()).stream()
-            .filter(application -> application.getStatus() == InternshipApplication.Status.PENDING || application.getStatus() == InternshipApplication.Status.SUCCESSFUL)
+        }
+
+        // Check if student has already accepted an internship
+        boolean hasAccepted = applications.findByStudent(student.getUserId()).stream()
+            .anyMatch(app -> 
+                app.getStatus() == InternshipApplication.Status.SUCCESSFUL
+                && app.studentAccepted()
+            );
+
+        if (hasAccepted) {
+            throw new IllegalStateException("You already have an accepted internship placement and cannot apply for new ones.");
+        }
+
+        // Count current active applications (pending OR successful but not accepted)
+        long activeCount = applications.findByStudent(student.getUserId()).stream()
+            .filter(app ->
+                app.getStatus() == InternshipApplication.Status.PENDING ||
+                (app.getStatus() == InternshipApplication.Status.SUCCESSFUL && !app.studentAccepted())
+            )
             .count();
 
-        if (studentActiveAppCount > 3)
-            throw new IllegalStateException("Maximum of 3 active Internship Applications allowed!");
+        if (activeCount >= 3) {
+            throw new IllegalStateException("Maximum of 3 active internship applications allowed!");
+        }
 
-        InternshipApplication application = new InternshipApplication(UUID.randomUUID().toString(), student.getUserId(), internship.getId());
-        
-        applications.save(application);
+        // Prevent duplicate application to the same internship
+        boolean alreadyApplied = applications.findByStudent(student.getUserId()).stream()
+            .anyMatch(app -> app.getInternshipId().equals(internship.getId()));
+
+        if (alreadyApplied) {
+            throw new IllegalStateException("You have already applied for this internship.");
+        }
+
+        // Create and save application
+        InternshipApplication newApp = new InternshipApplication(
+            UUID.randomUUID().toString(),
+            student.getUserId(),
+            internship.getId()
+        );
+
+        applications.save(newApp);
     }
+
 
     public void acceptInternship(Student student, InternshipApplication internshipApplication, Internship internship) {
         // Must belong to student
