@@ -32,7 +32,7 @@ public class AppConfig {
 
         // Instantiate controllers
         LoginController loginController = new LoginController(userRepo);
-        StudentController studentController = new StudentController(internshipRepo, appRepo);
+        StudentController studentController = new StudentController(internshipRepo, appRepo, userRepo);
         CompanyRepController repController = new CompanyRepController(internshipRepo, appRepo, userRepo, companyRepo);
         StaffController staffController = new StaffController(userRepo, internshipRepo, appRepo);
 

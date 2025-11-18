@@ -24,25 +24,28 @@ public class CompanyRepMenuView {
 
     public void displayCompanyRepMenu(CompanyRepresentative rep) {
         while (true) {
-            System.out.println("\n====== Company Representative Menu ======");
             System.out.println("1. Create internship opportunity");
             System.out.println("2. View / Filter my internships");
-            System.out.println("3. Toggle internship visibility");
-            System.out.println("4. View applications for internship");
-            System.out.println("5. Approve or Reject applications");
-            System.out.println("6. Change password");
-            System.out.println("7. Logout");
+            System.out.println("3. Edit internship");
+            System.out.println("4. Delete internship");
+            System.out.println("5. Toggle internship visibility");
+            System.out.println("6. View applications");
+            System.out.println("7. Approve / Reject applications");
+            System.out.println("8. Change password");
+            System.out.println("9. Logout");
 
             int choice = ConsoleUtil.readInt("Choose: ", 1, 7);
 
             switch (choice) {
                 case 1 -> createInternship(rep);
                 case 2 -> browserView.show(rep);
-                case 3 -> toggleInternshipVisibility(rep);
-                case 4 -> viewApplications(rep);
-                case 5 -> approveRejectInternshipApplication(rep);
-                case 6 -> changePassword(rep);
-                case 7 -> { return; }
+                case 3 -> editInternship(rep);
+                case 4 -> deleteInternship(rep);
+                case 5 -> toggleInternshipVisibility(rep);
+                case 6 -> viewApplications(rep);
+                case 7 -> approveRejectInternshipApplication(rep);
+                case 8 -> changePassword(rep);
+                case 9 -> { return; }
             }
         }
     }
@@ -292,5 +295,86 @@ public class CompanyRepMenuView {
         // Basic RFC-compliant pattern for console applications
         return email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$");
     }
+
+    private void editInternship(CompanyRepresentative rep) {
+        List<Internship> list = getInternshipList(rep);
+        if (list.isEmpty()) return;
+
+        int index = ConsoleUtil.readInt("Select internship index, 0 to cancel: ", 0, list.size());
+        if (index == 0) return;
+
+        Internship i = list.get(index - 1);
+
+        System.out.print("New title (blank = unchanged): ");
+        String title = sc.nextLine().trim();
+        title = title.isEmpty() ? null : title;
+
+        System.out.print("New description (blank = unchanged): ");
+        String desc = sc.nextLine().trim();
+        desc = desc.isEmpty() ? null : desc;
+
+        System.out.print("New major (blank = unchanged): ");
+        String major = sc.nextLine().trim();
+        major = major.isEmpty() ? null : major;
+
+        System.out.print("Change level? (1=Basic,2=Intermediate,3=Advanced,0=Skip): ");
+        int lvl = ConsoleUtil.readInt("", 0, 3);
+        Internship.Level level = (lvl == 0) ? null : Internship.Level.values()[lvl - 1];
+
+        LocalDate start = promptDate("New start (blank = unchanged): ");
+        LocalDate end = promptDate("New end (blank = unchanged): ");
+
+        int slots = ConsoleUtil.readInt("New slots (1-10, 0 = unchanged): ", 0, 10);
+        if (slots == 0) slots = -1;
+
+        try {
+            companyRepController.editInternship(i, title, desc, level, major, start, end, slots);
+            System.out.println("Internship updated.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private void deleteInternship(CompanyRepresentative rep) {
+        List<Internship> list = getInternshipList(rep);
+        if (list.isEmpty()) return;
+
+        int index = ConsoleUtil.readInt("Select internship index, 0 to cancel: ", 0, list.size());
+        if (index == 0) return;
+
+        Internship i = list.get(index - 1);
+
+        try {
+            companyRepController.deleteInternship(i);
+            System.out.println("Internship deleted.");
+        } catch (Exception e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * prompt for a date from user input, allows blank to skip
+     * @param msg message to display before input
+     * @return parsed LocalDate, or null if blank input
+     */
+    private LocalDate promptDate(String msg) {
+        while (true) {
+            System.out.print(msg);
+            String input = sc.nextLine().trim();
+
+            // allow skipping
+            if (input.isEmpty()) {
+                return null;
+            }
+
+            // validate date format and real date
+            try {
+                return LocalDate.parse(input);
+            } catch (DateTimeParseException e) {
+                System.out.println("Invalid date format! Use yyyy-MM-dd.");
+            }
+        }
+    }
+
 
 }

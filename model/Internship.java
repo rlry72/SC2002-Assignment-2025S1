@@ -15,7 +15,7 @@ public class Internship {
     public enum Status {PENDING, APPROVED, REJECTED, FILLED};
     private Status status;
     private CompanyRepresentative cr;
-    private final int maxSlots;  
+    private int maxSlots;  
     private int confirmedSlots = 0;
     private final Set<String> applicantIds = new HashSet<>();
     private boolean isVisible;
@@ -69,12 +69,20 @@ public class Internship {
         return title;
     }
 
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
     public Set<String> getApplicantIds() {
         return applicantIds;
     }
 
     public Company getCompany() {
         return company;
+    }
+
+    public void setCompany(Company company) {
+        this.company = company;
     }
 
     public int getConfirmedSlots() {
@@ -89,24 +97,48 @@ public class Internship {
         return desc;
     }
 
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
     public LocalDate getEndDate() {
         return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
     }
 
     public Level getLevel() {
         return level;
     }
 
+    public void setLevel(Level level) {
+        this.level = level;
+    }
+
     public String getMajor() {
         return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
     }
 
     public int getMaxSlots() {
         return maxSlots;
     }
 
+    public void setMaxSlots(int slots) {
+        this.maxSlots = slots;
+    }
+
     public LocalDate getStartDate() {
         return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
     }
 
     public boolean isOpen(LocalDate today) {

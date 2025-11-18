@@ -11,14 +11,17 @@ import model.InternshipFilter;
 import model.Student;
 import repository.InternshipAppRepository;
 import repository.InternshipRepository;
+import repository.UserRepository;
 
 public class StudentController {
     private final InternshipRepository internships;
     private final InternshipAppRepository applications;
+    private final UserRepository users;
 
-    public StudentController(InternshipRepository internshipRepo, InternshipAppRepository appRepo) {
+    public StudentController(InternshipRepository internshipRepo, InternshipAppRepository appRepo, UserRepository userRepo) {
         this.internships = internshipRepo;
         this.applications = appRepo;
+        this.users = userRepo;
     }
 
     public List<Internship> getEligibleInternships(Student s) {
@@ -30,7 +33,6 @@ public class StudentController {
             .filter(i -> i.getStatus() == Internship.Status.APPROVED)
             .filter(Internship::getVisibility)
             .filter(i -> i.isOpen(currDate))
-            .filter(i -> i.getMajor().equalsIgnoreCase(s.getMajor()))
             .filter(i -> isLevelAllowed(s, i))
             .sorted(Comparator.comparing(Internship::getTitle))
             .toList();
@@ -43,7 +45,6 @@ public class StudentController {
             .filter(i -> i.getStatus() == Internship.Status.APPROVED)
             .filter(Internship::getVisibility)
             .filter(i -> i.isOpen(today))
-            .filter(i -> i.getMajor().equalsIgnoreCase(s.getMajor()))
             .filter(i -> isLevelAllowed(s, i))
             .sorted(Comparator.comparing(Internship::getTitle))
             .toList();
@@ -66,68 +67,52 @@ public class StudentController {
     }
 
     public void applyInternship(Student student, Internship internship) {
-        if (internship.getStatus() != Internship.Status.APPROVED) {
+        if (internship.getStatus() != Internship.Status.APPROVED) 
             throw new IllegalArgumentException("This internship is not approved yet!");
-        }
+        long studentActiveAppCount = applications.findByStudent(student.getUserId()).stream()
+            .filter(application -> application.getStatus() == InternshipApplication.Status.PENDING || application.getStatus() == InternshipApplication.Status.SUCCESSFUL)
+            .count();
 
-        // All applications by this student
-        List<InternshipApplication> apps = applications.findByStudent(student.getUserId());
+        if (studentActiveAppCount > 3)
+            throw new IllegalStateException("Maximum of 3 active Internship Applications allowed!");
 
-        // 1) Enforce max 3 active applications
-        long activeCount = apps.stream()
-                .filter(InternshipApplication::isActive)   // PENDING or SUCCESSFUL
-                .count();
-
-        if (activeCount >= 3) {
-            throw new IllegalStateException("Maximum of 3 active internship applications allowed!");
-        }
-
-        // 2) Prevent duplicate applications for the same internship
-        boolean alreadyAppliedForThis = apps.stream()
-                .anyMatch(a ->
-                        a.getInternshipId().equals(internship.getId()) &&
-                        a.isActive()
-                );
-
-        if (alreadyAppliedForThis) {
-            throw new IllegalStateException("You already have an active application for this internship.");
-        }
-
-        // 3) (Optional) extra safety: check internship is still open + not full
-        // LocalDate today = LocalDate.now();
-        // if (!internship.isOpen(today)) throw new IllegalStateException("Application period is closed.");
-        // if (internship.isFull()) throw new IllegalStateException("Internship slots are filled.");
-
-        // 4) Create and save new application
-        InternshipApplication application =
-                new InternshipApplication(UUID.randomUUID().toString(),
-                                        student.getUserId(),
-                                        internship.getId());
-
+        InternshipApplication application = new InternshipApplication(UUID.randomUUID().toString(), student.getUserId(), internship.getId());
+        
         applications.save(application);
     }
 
-
     public void acceptInternship(Student student, InternshipApplication internshipApplication, Internship internship) {
+        // Must belong to student
         if (!internshipApplication.getStudentId().equals(student.getUserId()))
             throw new IllegalArgumentException("This application does not belong to you!");
+
+        // Only successful applications can be accepted
         if (internshipApplication.getStatus() != InternshipApplication.Status.SUCCESSFUL)
             throw new IllegalArgumentException("You can only accept applications that are successful.");
-        if (internshipApplication.studentAccepted())
-            throw new IllegalArgumentException("This application has already been accepted.");
 
+        // Check if student has already accepted any internship
+        boolean alreadyAccepted = applications.findByStudent(student.getUserId()).stream()
+                .anyMatch(app -> app.studentAccepted());
+
+        if (alreadyAccepted)
+            throw new IllegalStateException("You have already accepted an internship and cannot accept another.");
+
+        // Accept this internship
         internshipApplication.accept();
         applications.save(internshipApplication);
+
         internship.addConfirmedSlot();
         internships.save(internship);
 
-        for (InternshipApplication otherApplications : applications.findByStudent(student.getUserId())) {
-            if (!otherApplications.getId().equals(internshipApplication.getId())) {
-                otherApplications.setStatus(InternshipApplication.Status.WITHDRAWN);
-                applications.save(otherApplications);
+        // Withdraw all other apps
+        for (InternshipApplication other : applications.findByStudent(student.getUserId())) {
+            if (!other.getId().equals(internshipApplication.getId())) {
+                other.setStatus(InternshipApplication.Status.WITHDRAWN);
+                applications.save(other);
             }
         }
     }
+
 
     public void withdrawFromInternship(Student student, InternshipApplication application) {
         if (!application.getStudentId().equals(student.getUserId())) {
@@ -144,6 +129,10 @@ public class StudentController {
         }
 
 
+    }
+
+    public Student getStudentById(String studentId) {
+        return users.findById(studentId).filter(u -> u instanceof Student).map(u -> (Student) u).orElse(null);
     }
     
 }

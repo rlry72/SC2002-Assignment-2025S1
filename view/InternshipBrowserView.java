@@ -168,19 +168,20 @@ public class InternshipBrowserView {
             return;
         }
 
-        System.out.printf("%-4s %-22s %-14s %-8s %-8s %-13s %-10s%n",
-                "#", "Title", "Company", "Level", "Major", "Remaining", "Status");
+        System.out.printf("%-4s %-25s %-18s %-10s %-35s %-12s %-10s%n",
+            "#", "Title", "Company", "Level", "Major", "Remaining", "Status");
 
         int index = 1;
         for (Internship i : list) {
-            System.out.printf("%-4d %-22s %-14s %-8s %-8s %-13s %-10s%n",
+            System.out.printf("%-4d %-25s %-18s %-10s %-35s %-12s %-10s%n",
                     index++,
                     i.getTitle(),
                     i.getCompanyName(),
                     i.getLevel(),
                     i.getMajor(),
                     i.getRemainingSlots() + "/" + i.getMaxSlots(),
-                    i.getStatus());
+                    i.getStatus()
+            );
         }
 
         // Save per user
@@ -191,7 +192,7 @@ public class InternshipBrowserView {
         return resultCache.getOrDefault(caller.getUserId(), List.of());
     }
 
-    private void printInternshipDetails(Internship i) {
+    public void printInternshipDetails(Internship i) {
         String title = " " + i.getTitle() + " ";
         int width = Math.max(80, title.length() + 6); // dynamic width
         String border = repeat("-", width);

@@ -79,7 +79,7 @@ public class StudentMenuView {
         if (choice == 0) return;
 
         Internship selected = internshipList.get(choice - 1);
-
+        browserView.printInternshipDetails(selected);
         try {
             studentController.applyInternship(s, selected);
             System.out.println("Application submitted.");
@@ -184,12 +184,29 @@ public class StudentMenuView {
     }
 
     private void printApplications(List<InternshipApplication> applications) {
-        System.out.printf("%-4s %-15s %-15s %-15s %-10s%n",
-                "No.","App ID","Internship ID","Student ID","Status");
-        for (int i=0;i<applications.size();i++) {
+        System.out.printf("%-4s %-35s %-18s %-15s %-18s %-12s%n",
+                "No.", "Internship Title", "Company", "Student ID", "Student Name", "Status");
+
+        for (int i = 0; i < applications.size(); i++) {
             InternshipApplication a = applications.get(i);
-            System.out.printf("%-4d %-15s %-15s %-15s %-10s%n",
-                    i+1,a.getId(),a.getInternshipId(),a.getStudentId(),a.getStatus());
+
+            // Get internship
+            Internship internship = studentController.getInternshipById(a.getInternshipId());
+            String title   = (internship != null) ? internship.getTitle() : "(Deleted)";
+            String company = (internship != null) ? internship.getCompanyName() : "-";
+
+            // Get student
+            Student student = studentController.getStudentById(a.getStudentId());
+            String studentName = (student != null) ? student.getName() : "(Unknown)";
+
+            System.out.printf("%-4d %-35s %-18s %-15s %-18s %-12s%n",
+                    (i + 1),
+                    title,
+                    company,
+                    a.getStudentId(),
+                    studentName,
+                    a.getStatus());
         }
     }
+
 }

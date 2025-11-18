@@ -107,4 +107,48 @@ public class CompanyRepController {
             .toList();
     }
 
+    /**
+     * allow company rep to update internship details if not approved yet
+     * @param internship internship to edit
+     * @param title updated title, same if null
+     * @param desc updated description, same if null
+     * @param level updated level, same if null
+     * @param major updated major, same if null
+     * @param start updated start date, same if null
+     * @param end updated end date, same if null
+     * @param slots updated slot count, same if -1
+     * @throws IllegalStateException if internship already approved/filled
+     */
+    public void editInternship(Internship internship,
+                            String title, String desc, Internship.Level level,
+                            String major, LocalDate start, LocalDate end, int slots) {
+
+        if (internship.getStatus() != Internship.Status.PENDING) {
+            throw new IllegalStateException("Only pending internships can be edited.");
+        }
+
+        if (title != null) internship.setTitle(title);
+        if (desc != null) internship.setDesc(desc);
+        if (level != null) internship.setLevel(level);
+        if (major != null) internship.setMajor(major);
+        if (start != null) internship.setStartDate(start);
+        if (end != null) internship.setEndDate(end);
+        if (slots > 0 && slots <= 10) internship.setMaxSlots(slots);
+
+        internships.save(internship);
+    }
+
+    /**
+     * delete internship if still pending approval
+     * @param internship internship to delete
+     * @throws IllegalStateException if internship is approved, rejected or filled
+     */
+    public void deleteInternship(Internship internship) {
+        if (internship.getStatus() != Internship.Status.PENDING) {
+            throw new IllegalStateException("Only pending internships can be deleted.");
+        }
+        internships.delete(internship.getId());
+    }
+
+
 }

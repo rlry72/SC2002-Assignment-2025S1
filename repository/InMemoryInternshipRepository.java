@@ -29,6 +29,11 @@ public class InMemoryInternshipRepository implements InternshipRepository{
     }
 
     @Override
+    public void delete(String id) {
+        internships.remove(id);
+    }
+
+    @Override
     public List<Internship> findByCompany(String companyName) {
         return internships.values().stream()
             .filter(i -> i.getCompanyName().equals(companyName))
