@@ -12,7 +12,7 @@ However, due to the complexity of the main diagram, I have broken it down into s
 - Execute approval (subSeq_4a.png)
 - Execute reject (subSeq_4b.png)
 
-- ## Internship Application Class diagrams
+## Internship Application Class diagrams
 
 - Consists of 3 class diagrams split into:
 - Entity classes
