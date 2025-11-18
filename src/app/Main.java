@@ -7,7 +7,7 @@ package app;
 public class Main {
     /**
      * main method
-     * @param args args
+     * @param args argste
      */
     public static void main(String[] args) {
         AppConfig config = new AppConfig();

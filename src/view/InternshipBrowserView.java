@@ -108,9 +108,12 @@ public class InternshipBrowserView {
         printTable(caller, list);
         if (list.isEmpty()) return;
 
-        System.out.println("\nEnter internship index to view details (0 to return): ");
-        String input = sc.nextLine().trim();
-        int index = Integer.parseInt(input);
+        // System.out.println("\nEnter internship index to view details (0 to return): ");
+        // String input = sc.nextLine().trim();
+        // int index = Integer.parseInt(input);
+        int index = ConsoleUtil.readInt("\nEnter internship index to view details (0 to return): ", 0, list.size());
+
+        if (index == 0) return;
 
         if (index >= 1 && index <= list.size())
             printInternshipDetails(list.get(index - 1), caller instanceof Student);
@@ -237,22 +240,22 @@ public class InternshipBrowserView {
         boolean isStudent = caller instanceof Student;
 
         if (isStudent) {
-            System.out.printf("%-4s %-25s %-18s %-10s %-35s %-12s%n",
+            System.out.printf("%-4s %-25s %-18s %-14s %-35s %-12s%n",
                     "#", "Title", "Company", "Level", "Major", "Remaining");
         } else {
-            System.out.printf("%-4s %-25s %-18s %-10s %-35s %-12s %-10s%n",
+            System.out.printf("%-4s %-25s %-18s %-14s %-35s %-12s %-10s%n",
                     "#", "Title", "Company", "Level", "Major", "Remaining", "Status");
         }
 
         int index = 1;
         for (Internship i : list) {
             if (isStudent) {
-                System.out.printf("%-4d %-25s %-18s %-10s %-35s %-12s%n",
+                System.out.printf("%-4d %-25s %-18s %-14s %-35s %-12s%n",
                         index++, i.getTitle(), i.getCompanyName(),
                         i.getLevel(), i.getMajor(),
                         i.getRemainingSlots() + "/" + i.getMaxSlots());
             } else {
-                System.out.printf("%-4d %-25s %-18s %-10s %-35s %-12s %-10s%n",
+                System.out.printf("%-4d %-25s %-18s %-14s %-35s %-12s %-10s%n",
                         index++, i.getTitle(), i.getCompanyName(),
                         i.getLevel(), i.getMajor(),
                         i.getRemainingSlots() + "/" + i.getMaxSlots(),
