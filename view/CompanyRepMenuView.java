@@ -106,6 +106,7 @@ public class CompanyRepMenuView {
         Internship internship = companyRepController.createInternship(title, desc, internshipLevel, major, openDate, closeDate, rep, slots, false);
 
         System.out.println("Internship created with ID: " + internship.getId() + " (PENDING APPROVAL)");
+        browserView.printInternshipDetails(internship);
     }
 
     private List<Internship> getInternshipList(CompanyRepresentative rep) {
