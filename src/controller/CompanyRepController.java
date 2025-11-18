@@ -209,7 +209,7 @@ public class CompanyRepController {
      * @param major new preferred major (ignored if null)
      * @param start new start date (ignored if null)
      * @param end new end date (ignored if null)
-     * @param slots new slot count (ignored if <= 0)
+     * @param slots new slot count (ignored if less than 0)
      * @throws IllegalStateException if internship cannot be modified
      */
     public void editInternship(Internship internship, String title, String desc, Internship.Level level,

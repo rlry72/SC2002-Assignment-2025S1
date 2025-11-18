@@ -37,32 +37,50 @@ public class CompanyRepresentative extends User {
         this.isApproved = false;
     }
 
-    /** @return department name */
+    /** 
+     * return department name
+     * @return department name 
+     */
     public String getDept() {
         return dept;
     }
 
-    /** update department */
+    /**
+     * update department name
+     * @param dept department name
+     */
     public void setDept(String dept) {
         this.dept = dept;
     }
 
-    /** @return job position title */
+    /**
+     * return job position title 
+     * @return job position title 
+     */
     public String getPosition() {
         return position;
     }
 
-    /** update job position */
+    /**
+     * update job position title
+     * @param position job position title
+     */
     public void setPosition(String position) {
         this.position = position;
     }
 
-    /** @return approval state */
+    /** 
+     * return approval state
+     * @return approval state 
+     */
     public boolean isApproved() {
         return isApproved;
     }
 
-    /** update approval state */
+    /**
+     * update approval state
+     * @param isApproved new approval state
+     */
     public void setApproved(boolean isApproved) {
         this.isApproved = isApproved;
     }
@@ -76,12 +94,18 @@ public class CompanyRepresentative extends User {
         return super.getEmail();
     }
 
-    /** @return associated company object */
+    /**
+     * get associated company object 
+     * @return associated company object
+     */
     public Company getCompany() {
         return this.c;
     }
 
-    /** update company association */
+    /**
+     * update associated company object
+     * @param c new company object
+     */
     public void setCompany(Company c) {
         this.c = c;
     }

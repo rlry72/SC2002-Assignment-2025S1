@@ -20,6 +20,8 @@ public class CsvParser {
      * read student records from a CSV file and convert them into Student objects.
      * filename should not contain full path, only resource name.
      * e.g. CsvParser.importStudents("sample_student_list.csv");
+     * @param filename classpath resource name of CSV file
+     * @return list of Student objects parsed from file
      */
     public static List<Student> importStudents(String filename) {
         List<Student> students = new ArrayList<>();
@@ -66,6 +68,8 @@ public class CsvParser {
 
     /**
      * read staff records from classpath resource
+     * @param filename classpath resource name of CSV file
+     * @return list of Staff objects parsed from file
      */
     public static List<Staff> importStaff(String filename) {
         List<Staff> staffList = new ArrayList<>();

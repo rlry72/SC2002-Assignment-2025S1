@@ -108,7 +108,10 @@ public class Internship {
         return id;
     }
 
-    /** update internship id */
+    /** 
+     * update internship id
+     * @param id new internship id
+     */
     public void setId(String id) {
         this.id = id;
     }
@@ -118,7 +121,10 @@ public class Internship {
         return status;
     }
 
-    /** update internship approval state */
+    /** 
+     * update internship approval state
+     * @param status new internship status
+     */
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -128,107 +134,170 @@ public class Internship {
         return isVisible;
     }
 
-    /** update visibility state */
+    /** 
+     * update visibility state
+     * @param visibility new visibility state
+     */
     public void setVisibility(boolean visibility) {
         this.isVisible = visibility;
     }
 
-    /** @return name of offering company */
+    /**
+     * return name of offering company 
+     * @return name of offering company 
+     */
     public String getCompanyName() {
         return company.getCompanyName();
     }
 
-    /** @return internship title */
+    /** 
+     * return internship title
+     * @return internship title 
+     */
     public String getTitle() {
         return title;
     }
 
-    /** update internship title */
+    /** 
+     * update internship title 
+     * @param title new internship title
+    */
     public void setTitle(String title) {
         this.title = title;
     }
 
-    /** @return immutable applicant id set */
+    /** 
+     * return set of applicant student IDs
+     * @return immutable applicant id set 
+     */
     public Set<String> getApplicantIds() {
         return applicantIds;
     }
 
-    /** @return company object */
+    /** 
+     * return company object
+     * @return company object 
+     */
     public Company getCompany() {
         return company;
     }
 
-    /** update company reference */
+    /** 
+     * update company reference 
+     * @param company new company object
+    */
     public void setCompany(Company company) {
         this.company = company;
     }
 
-    /** @return number of confirmed slots */
+    /** 
+     * return number of confirmed slots
+     * @return number of confirmed slots
+     */
     public int getConfirmedSlots() {
         return confirmedSlots;
     }
 
-    /** @return company representative who created posting */
+    /** 
+     * return internship creator
+     * @return company representative who created posting 
+     */
     public CompanyRepresentative getCr() {
         return cr;
     }
 
-    /** @return internship description */
+    /** 
+     * return internship description
+     * @return internship description 
+     */
     public String getDesc() {
         return desc;
     }
 
-    /** update description text */
+    /** 
+     * update description text 
+     * @param desc new description text
+    */
     public void setDesc(String desc) {
         this.desc = desc;
     }
 
-    /** @return closing date */
+    /** 
+     * return closing date
+     * @return closing date 
+     */
     public LocalDate getEndDate() {
         return endDate;
     }
 
-    /** update closing date */
+    /** 
+     * update closing date 
+     * @param endDate new closing date
+    */
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
     }
 
-    /** @return internship academic level */
+    /** 
+     * return internship level
+     * @return internship academic level 
+     */
     public Level getLevel() {
         return level;
     }
 
-    /** update internship level */
+    /** 
+     * update internship level 
+     * @param level new internship level
+    */
     public void setLevel(Level level) {
         this.level = level;
     }
 
-    /** @return preferred major text */
+    /** 
+     * return preferred major
+     * @return preferred major text
+     */
     public String getMajor() {
         return major;
     }
 
-    /** update preferred major */
+    /**
+     * update preferred major 
+     * @param major new preferred major
+    */
     public void setMajor(String major) {
         this.major = major;
     }
 
-    /** @return max available slot count */
+    /** 
+     * return max available slot count
+     * @return max available slot count 
+     */
     public int getMaxSlots() {
         return maxSlots;
     }
 
-    /** update max allowed slot count */
+    /** 
+     * update max allowed slot count 
+     * @param slots new max slot count
+    */
     public void setMaxSlots(int slots) {
         this.maxSlots = slots;
     }
 
-    /** @return open date */
+    /** 
+     * return opening date
+     * @return opening date
+     */
     public LocalDate getStartDate() {
         return startDate;
     }
 
-    /** update open date */
+    /** 
+     * update opening date 
+     * @param startDate new open date
+    */
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
     }
@@ -264,6 +333,7 @@ public class Internship {
     }
 
     /**
+     * return available slot count
      * @return available slot count
      */
     public int getRemainingSlots() {

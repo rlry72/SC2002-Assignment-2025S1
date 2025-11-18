@@ -79,10 +79,8 @@ public class MainMenuView {
     /**
      * authenticate user, determine assigned role, and redirect to appropriate menu
      * automatically logs user out upon returning from submenu views
-     *
-     * @implNote
-     *  • unapproved company representatives may view notice but cannot access menu  
-     *  • valid role types: Student, CompanyRepresentative, Staff
+     * unapproved company representatives may view notice but cannot access menu  
+     * valid role types: Student, CompanyRepresentative, Staff
      */
     private void handleLogin() {
         User user = loginView.showLoginScreen();

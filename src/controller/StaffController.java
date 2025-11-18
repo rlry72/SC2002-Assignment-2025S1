@@ -16,6 +16,9 @@ import repository.InternshipAppRepository;
 import repository.InternshipRepository;
 import repository.UserRepository;
 
+/**
+ * staffcontroller class to implement logic for staff operations
+ */
 public class StaffController {
     /**
      * repository of all users
