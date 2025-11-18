@@ -146,28 +146,37 @@ public class CompanyRepMenuView {
         }
 
         System.out.println("\n==================== Your Internship Listings ====================");
-        System.out.printf("%-4s %-30s %-28s %-12s %-18s %-18s %-12s %-12s %-12s %-10s %-8s%n",
+        System.out.printf("%-4s %-28s %-24s %-10s %-14s %-15s %-12s %-12s %-10s %-10s %-6s%n",
                 "No.", "Title", "Major", "Level", "Company", "Representative",
-                "Open Date", "Close Date", "Status", "Visibility", "Slots");
+                "Open Date", "Close Date", "Status", "Visible", "Apps");
 
         for (int i = 0; i < internshipList.size(); i++) {
             Internship in = internshipList.get(i);
-            System.out.printf("%-4d %-30s %-28s %-12s %-18s %-18s %-12s %-12s %-12s %-10s %-8s%n",
+
+            // Count submitted applications
+            int appCount = companyRepController.getInternshipApplications(in.getId()).size();
+
+            System.out.printf("%-4d %-28s %-24s %-10s %-14s %-15s %-12s %-12s %-10s %-10s %-6d%n",
                     (i + 1),
-                    in.getTitle(),
-                    in.getMajor(),
+                    crop(in.getTitle(), 28),
+                    crop(in.getMajor(), 24),
                     in.getLevel(),
-                    in.getCompanyName(),
-                    in.getCr().getName(),
+                    crop(in.getCompanyName(), 14),
+                    crop(in.getCr().getName(), 15),
                     in.getStartDate(),
                     in.getEndDate(),
                     in.getStatus(),
-                    (in.getVisibility() ? "Visible" : "Hidden"),
-                    (in.getConfirmedSlots() + "/" + in.getMaxSlots())
+                    (in.getVisibility() ? "Yes" : "No"),
+                    appCount
             );
         }
 
         return internshipList;
+    }
+
+    private String crop(String text, int maxLength) {
+        if (text == null) return "";
+        return text.length() <= maxLength ? text : text.substring(0, maxLength - 3) + "...";
     }
 
  

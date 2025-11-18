@@ -202,21 +202,27 @@ public class StaffMenuView {
         }
 
         System.out.println("\n====================== ALL INTERNSHIPS ======================");
-        System.out.printf("%-4s %-30s %-26s %-12s %-26s %-12s %-12s %-10s %-10s%n",
-                "No.", "Title", "Major", "Level", "Company", "Open", "Close", "Status", "Slots");
+        System.out.printf("%-4s %-28s %-24s %-10s %-22s %-12s %-12s %-10s %-10s %-6s%n",
+                "No.", "Title", "Major", "Level", "Company", "Open", "Close", "Status", "Slots", "Apps");
 
         for (int i = 0; i < list.size(); i++) {
             Internship in = list.get(i);
-            System.out.printf("%-4d %-30s %-26s %-12s %-26s %-12s %-12s %-10s %-10s%n",
-                    i + 1,
-                    crop(in.getTitle(), 30),
-                    crop(in.getMajor(), 26),
+
+            // Count applications submitted for this internship
+            int appCount = staffController.getAllApplicationsForInternship(in.getId()).size();
+
+            System.out.printf("%-4d %-28s %-24s %-10s %-22s %-12s %-12s %-10s %-10s %-6d%n",
+                    (i + 1),
+                    crop(in.getTitle(), 28),
+                    crop(in.getMajor(), 24),
                     in.getLevel(),
-                    crop(in.getCompanyName(), 26),
+                    crop(in.getCompanyName(), 22),
                     in.getStartDate(),
                     in.getEndDate(),
                     in.getStatus(),
-                    (in.getConfirmedSlots() + "/" + in.getMaxSlots()));
+                    (in.getConfirmedSlots() + "/" + in.getMaxSlots()),
+                    appCount
+            );
         }
 
         int index = ConsoleUtil.readInt("\nSelect internship to view applications (0 to cancel): ", 0, list.size());
@@ -242,13 +248,14 @@ public class StaffMenuView {
             String appShort = a.getId().substring(0, 8);
 
             System.out.printf("%-4d %-15s %-22s %-26s %-14s %-12s %-10s%n",
-                    i + 1,
+                    (i + 1),
                     a.getStudentId(),
                     crop(studentName, 22),
                     crop(email, 26),
                     a.getStatus(),
                     accepted,
-                    appShort);
+                    appShort
+            );
         }
 
         int appIndex = ConsoleUtil.readInt("\nSelect application to inspect (0 to exit): ", 0, apps.size());
@@ -258,6 +265,7 @@ public class StaffMenuView {
         String studentName = staffController.getStudentName(chosen.getStudentId());
         browserView.printApplicationDetails(chosen, studentName, selected.getTitle());
     }
+
 
     /**
      * shorten text for table display, appending ellipsis when truncated
