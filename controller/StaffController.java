@@ -290,6 +290,21 @@ public class StaffController {
                 .orElse("Unknown Internship");
     }
 
+    public Internship getInternshipById(String internshipId) {
+        return internships.findById(internshipId).orElse(null);
+    }
+
+    public Student getStudentById(String studentId) {
+        return users.findById(studentId).filter(u -> u instanceof Student).map(u -> (Student) u).orElse(null);
+    }
+
+    public List<Internship> getAllInternships() {
+            return internships.findAll();
+        }
+
+        public List<InternshipApplication> getAllApplicationsForInternship(String internshipId) {
+            return applications.findByInternship(internshipId); // does NOT filter by status
+        }
 
 }
 

@@ -23,19 +23,21 @@ public class StaffMenuView {
             System.out.println("1. Approve / Reject company representatives");
             System.out.println("2. Approve / Reject internship postings");
             System.out.println("3. Approve / Reject withdrawal requests");
-            System.out.println("4. View / Filter / Report internships"); // now browser
-            System.out.println("5. Change password");
-            System.out.println("6. Logout");
+            System.out.println("4. View / Filter / Report internships");
+            System.out.println("5. View ALL internship applications");
+            System.out.println("6. Change password");
+            System.out.println("7. Logout");
 
-            int choice = ConsoleUtil.readInt("Choose: ", 1, 6);
+            int choice = ConsoleUtil.readInt("Choose: ", 1, 7);
 
             switch (choice) {
                 case 1 -> manageCompanyReps();
                 case 2 -> manageInternships();
                 case 3 -> manageWithdrawals();
-                case 4 -> browserView.show(staff);   // <-- uses shared browser
-                case 5 -> changePassword(staff);
-                case 6 -> { return; }
+                case 4 -> browserView.show(staff);
+                case 5 -> viewAllApplications();        // <--- NEW METHOD
+                case 6 -> changePassword(staff);
+                case 7 -> { return; }
             }
         }
     }
@@ -82,27 +84,49 @@ public class StaffMenuView {
             return;
         }
 
-        System.out.printf("%-4s %-25s %-20s %-10s%n", "No.", "Title", "Company", "Level");
+        System.out.println("\n================ Pending Internships ================");
+        System.out.printf("%-4s %-25s %-20s %-10s %-30s %-12s %-12s %-15s%n",
+                "No.", "Title", "Company", "Level", "Major", "Open", "Close", "Slots");
+
         for (int i = 0; i < internships.size(); i++) {
             Internship in = internships.get(i);
-            System.out.printf("%-4d %-25s %-20s %-10s%n",
-                    i + 1, in.getTitle(), in.getCompanyName(), in.getLevel());
+            System.out.printf("%-4d %-25s %-20s %-10s %-30s %-12s %-12s %-15s%n",
+                    (i + 1),
+                    crop(in.getTitle(), 25),
+                    crop(in.getCompanyName(), 20),
+                    in.getLevel(),
+                    crop(in.getMajor(), 30),
+                    in.getStartDate(),
+                    in.getEndDate(),
+                    in.getRemainingSlots() + "/" + in.getMaxSlots()
+            );
         }
 
-        int index = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, internships.size());
+
+        int index = ConsoleUtil.readInt("Select internship to inspect (0 to cancel): ", 0, internships.size());
         if (index == 0) return;
 
         Internship selected = internships.get(index - 1);
-        int decision = ConsoleUtil.readInt("1 = Approve, 2 = Reject: ", 1, 2);
+
+        // View full details
+        browserView.printInternshipDetails(selected, false);
+
+        // Confirm decision
+        int decision = ConsoleUtil.readInt("\n1 = Approve, 2 = Reject, 3 = Back: ", 1, 3);
+        if (decision == 3) {
+            System.out.println("Returning to menu...");
+            return;
+        }
 
         if (decision == 1) {
             staffController.approveInternship(selected);
-            System.out.println("Approved internship.");
+            System.out.println("Internship approved.");
         } else {
             staffController.rejectInternship(selected);
-            System.out.println("Rejected internship.");
+            System.out.println("Internship rejected.");
         }
     }
+
 
     private void manageWithdrawals() {
         List<InternshipApplication> applications = staffController.getWithdrawalRequests();
@@ -111,28 +135,36 @@ public class StaffMenuView {
             return;
         }
 
-        System.out.printf("%-4s %-18s %-25s %-12s%n",
-                "No.", "Student", "Internship", "Status");
+        System.out.println("\n================ Withdrawal Requests ================");
+        System.out.printf("%-4s %-18s %-28s %-12s%n", "No.", "Student", "Internship", "Status");
 
         for (int i = 0; i < applications.size(); i++) {
             InternshipApplication a = applications.get(i);
-
-            // Fetch readable details instead of UUIDs
             String studentName = staffController.getStudentName(a.getStudentId());
             String internshipTitle = staffController.getInternshipTitle(a.getInternshipId());
 
-            System.out.printf("%-4d %-18s %-25s %-12s%n",
-                    (i + 1), studentName, internshipTitle, a.getStatus());
+            System.out.printf("%-4d %-18s %-28s %-12s%n",
+                    i + 1, studentName, internshipTitle, a.getStatus());
         }
 
-        int index = ConsoleUtil.readInt("Select application to manage, 0 to cancel: ",
-                                        0, applications.size());
+        int index = ConsoleUtil.readInt("Select application to inspect (0 to cancel): ", 0, applications.size());
         if (index == 0) return;
 
         InternshipApplication selected = applications.get(index - 1);
 
-        System.out.println("1 = Approve, 2 = Reject");
-        int decision = ConsoleUtil.readInt("Choose: ", 1, 2);
+        // Fetch related models
+        Internship internship = staffController.getInternshipById(selected.getInternshipId());
+        String studentName = staffController.getStudentName(selected.getStudentId());
+
+        // Display full detail view
+        browserView.printApplicationDetails(selected, studentName, internship.getTitle());
+
+        // Confirm action
+        int decision = ConsoleUtil.readInt("\n1 = Approve withdrawal, 2 = Reject, 3 = Back: ", 1, 3);
+        if (decision == 3) {
+            System.out.println("Returning to menu...");
+            return;
+        }
 
         if (decision == 1) {
             staffController.approveWithdrawal(selected);
@@ -142,6 +174,86 @@ public class StaffMenuView {
             System.out.println("Withdrawal rejected.");
         }
     }
+
+
+    private void viewAllApplications() {
+        List<Internship> list = staffController.getAllInternships();
+
+        if (list.isEmpty()) {
+            System.out.println("No internships available in system.");
+            return;
+        }
+
+        // ──────────────────────── Internship Table ─────────────────────────
+        System.out.println("\n====================== ALL INTERNSHIPS ======================");
+        System.out.printf("%-4s %-30s %-26s %-12s %-26s %-12s %-12s %-10s %-10s%n",
+                "No.", "Title", "Major", "Level", "Company", "Open", "Close", "Status", "Slots");
+
+        for (int i = 0; i < list.size(); i++) {
+            Internship in = list.get(i);
+            System.out.printf("%-4d %-30s %-26s %-12s %-26s %-12s %-12s %-10s %-10s%n",
+                    i + 1,
+                    crop(in.getTitle(), 30),
+                    crop(in.getMajor(), 26),
+                    in.getLevel(),
+                    crop(in.getCompanyName(), 26),
+                    in.getStartDate(),
+                    in.getEndDate(),
+                    in.getStatus(),
+                    (in.getConfirmedSlots() + "/" + in.getMaxSlots())
+            );
+        }
+
+        int index = ConsoleUtil.readInt("\nSelect internship to view applications (0 to cancel): ", 0, list.size());
+        if (index == 0) return;
+
+        Internship selected = list.get(index - 1);
+
+        List<InternshipApplication> apps = staffController.getAllApplicationsForInternship(selected.getId());
+
+        System.out.println("\n================ Applications for: " + selected.getTitle() + " =================");
+        if (apps.isEmpty()) {
+            System.out.println("No applications submitted for this internship.");
+            return;
+        }
+
+        // ──────────────────────── Applications Table ─────────────────────────
+        System.out.printf("%-4s %-15s %-22s %-26s %-14s %-12s %-10s%n",
+                "No.", "Student ID", "Student Name", "Email", "Status", "Accepted", "App ID(Short)");
+
+        for (int i = 0; i < apps.size(); i++) {
+            InternshipApplication a = apps.get(i);
+            String studentName = staffController.getStudentName(a.getStudentId());
+            String email = staffController.getStudentById(a.getStudentId()).getEmail();
+            String accepted = a.studentAccepted() ? "YES" : "NO";
+            String appShort = a.getId().substring(0, 8);
+
+            System.out.printf("%-4d %-15s %-22s %-26s %-14s %-12s %-10s%n",
+                    i + 1,
+                    a.getStudentId(),
+                    crop(studentName, 22),
+                    crop(email, 26),
+                    a.getStatus(),
+                    accepted,
+                    appShort
+            );
+        }
+
+        // Detailed view option
+        int appIndex = ConsoleUtil.readInt("\nSelect application to inspect (0 to exit): ", 0, apps.size());
+        if (appIndex == 0) return;
+
+        InternshipApplication chosen = apps.get(appIndex - 1);
+        String studentName = staffController.getStudentName(chosen.getStudentId());
+        browserView.printApplicationDetails(chosen, studentName, selected.getTitle());
+    }
+
+
+    private String crop(String text, int max) {
+        if (text == null) return "";
+        return text.length() <= max ? text : text.substring(0, max - 3) + "...";
+    }
+
 
 
     // private void printReportTable(List<Internship> internships) {

@@ -10,6 +10,7 @@ import model.CompanyRepresentative;
 import model.Internship;
 import model.InternshipApplication;
 import model.InternshipFilter;
+import model.Student;
 import repository.CompanyRepository;
 import repository.InternshipAppRepository;
 import repository.InternshipRepository;
@@ -150,5 +151,12 @@ public class CompanyRepController {
         internships.delete(internship.getId());
     }
 
+    public Internship getInternshipById(String internshipId) {
+        return internships.findById(internshipId).orElse(null);
+    }
+
+    public Student getStudentById(String studentId) {
+        return users.findById(studentId).filter(u -> u instanceof Student).map(u -> (Student) u).orElse(null);
+    }
 
 }

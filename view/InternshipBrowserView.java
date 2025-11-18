@@ -88,7 +88,7 @@ public class InternshipBrowserView {
         int index = Integer.parseInt(input);
 
         if (index >= 1 && index <= list.size()) {
-            printInternshipDetails(list.get(index - 1));
+            printInternshipDetails(list.get(index - 1), caller instanceof Student);
         }
     }
 
@@ -168,33 +168,98 @@ public class InternshipBrowserView {
             return;
         }
 
-        System.out.printf("%-4s %-25s %-18s %-10s %-35s %-12s %-10s%n",
-            "#", "Title", "Company", "Level", "Major", "Remaining", "Status");
+        boolean isStudent = caller instanceof Student;
+
+        if (isStudent) {
+            System.out.printf("%-4s %-25s %-18s %-10s %-35s %-12s%n",
+                    "#", "Title", "Company", "Level", "Major", "Remaining");
+        } else {
+            System.out.printf("%-4s %-25s %-18s %-10s %-35s %-12s %-10s%n",
+                    "#", "Title", "Company", "Level", "Major", "Remaining", "Status");
+        }
 
         int index = 1;
         for (Internship i : list) {
-            System.out.printf("%-4d %-25s %-18s %-10s %-35s %-12s %-10s%n",
-                    index++,
-                    i.getTitle(),
-                    i.getCompanyName(),
-                    i.getLevel(),
-                    i.getMajor(),
-                    i.getRemainingSlots() + "/" + i.getMaxSlots(),
-                    i.getStatus()
-            );
+            if (isStudent) {
+                System.out.printf("%-4d %-25s %-18s %-10s %-35s %-12s%n",
+                        index++,
+                        i.getTitle(),
+                        i.getCompanyName(),
+                        i.getLevel(),
+                        i.getMajor(),
+                        i.getRemainingSlots() + "/" + i.getMaxSlots()
+                );
+            } else {
+                System.out.printf("%-4d %-25s %-18s %-10s %-35s %-12s %-10s%n",
+                        index++,
+                        i.getTitle(),
+                        i.getCompanyName(),
+                        i.getLevel(),
+                        i.getMajor(),
+                        i.getRemainingSlots() + "/" + i.getMaxSlots(),
+                        i.getStatus()
+                );
+            }
         }
 
-        // Save per user
         resultCache.put(caller.getUserId(), list);
     }
+
 
     public List<Internship> getLastResults(User caller) {
         return resultCache.getOrDefault(caller.getUserId(), List.of());
     }
 
-    public void printInternshipDetails(Internship i) {
+    /** 
+     * Shows filtered internship results WITHOUT triggering browser interaction 
+     */
+    public void showFilteredList(User caller) {
+        List<Internship> list = switch (role) {
+            case STUDENT -> studentCtrl.getEligibleInternships((Student) caller, getFilterFor(caller));
+            case REP     -> repCtrl.getOwnInternshipsFiltered((CompanyRepresentative) caller, getFilterFor(caller));
+            case STAFF   -> staffCtrl.getFiltered(getFilterFor(caller));
+        };
+
+        printTable(caller, list);
+    }
+
+
+
+    public List<Internship> browseForSelection(User caller) {
+        while (true) {
+            List<Internship> list = caller instanceof Student
+                    ? studentCtrl.getEligibleInternships((Student) caller, getFilterFor(caller))
+                    : caller instanceof CompanyRepresentative
+                        ? repCtrl.getOwnInternshipsFiltered((CompanyRepresentative) caller, getFilterFor(caller))
+                        : staffCtrl.getFiltered(getFilterFor(caller));
+
+            printTable(caller, list);
+
+            int choice = ConsoleUtil.readInt("Enter internship index to view details (0 to exit): ", 0, list.size());
+            if (choice == 0) return List.of(); // treat as cancel
+
+            Internship selected = list.get(choice - 1);
+            printInternshipDetails(selected, caller instanceof Student);
+
+            if (confirmAction("Apply / Select this internship? (Y/N): ")) {
+                return list; // return list so caller can use same index
+            }
+        }
+    }
+
+    private boolean confirmAction(String message) {
+        while (true) {
+            System.out.print(message);
+            String input = sc.nextLine().trim().toLowerCase();
+            if (input.equals("y")) return true;
+            if (input.equals("n")) return false;
+            System.out.println("Please enter Y or N.");
+        }
+    }
+
+    public void printInternshipDetails(Internship i, boolean isStudentView) {
         String title = " " + i.getTitle() + " ";
-        int width = Math.max(80, title.length() + 6); // dynamic width
+        int width = Math.max(80, title.length() + 6);
         String border = repeat("-", width);
 
         System.out.println(border);
@@ -206,13 +271,42 @@ public class InternshipBrowserView {
         detailRow("Preferred Major", i.getMajor(), width);
         detailRow("Opening Date", i.getStartDate().toString(), width);
         detailRow("Closing Date", i.getEndDate().toString(), width);
-        detailRow("Status", i.getStatus().toString(), width);
         detailRow("Company Name", i.getCompanyName(), width);
-        detailRow("Company Representative", i.getCr().getName(), width);
-        detailRow("Slots", i.getMaxSlots() + " available", width);
+        detailRow("Representative", i.getCr().getName(), width);
+        detailRow("Slots", i.getRemainingSlots() + "/" + i.getMaxSlots(), width);
+
+        // Only show these when not student
+        if (!isStudentView) {
+            detailRow("Status", i.getStatus().toString(), width);
+            detailRow("Visibility", i.getVisibility() ? "Visible" : "Hidden", width);
+        }
 
         System.out.println(border);
     }
+
+
+    public void printApplicationDetails(InternshipApplication app, String studentName, String internshipTitle) {
+        // Build dynamic title
+        String title = " Internship Application Details ";
+        int width = Math.max(80, title.length() + 6);
+        String border = repeat("-", width);
+
+        System.out.println(border);
+        System.out.println("|" + center(title.trim(), width - 2) + "|");
+        System.out.println(border);
+
+        detailRow("Application ID", app.getId(), width);
+        detailRow("Student ID", app.getStudentId(), width);
+        detailRow("Student Name", studentName, width);
+        detailRow("Internship", internshipTitle, width);
+        detailRow("Status", app.getStatus().toString(), width);
+
+        // show if accepted
+        detailRow("Student Accepted", app.studentAccepted() ? "YES" : "NO", width);
+
+        System.out.println(border);
+    }
+
 
     private void detailRow(String label, String value, int width) {
         String line = " " + label + " : " + value;

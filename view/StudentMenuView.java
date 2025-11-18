@@ -65,100 +65,113 @@ public class StudentMenuView {
 
     private void apply(Student s) {
 
-        browserView.show(s); // let student view & update filters
-        List<Internship> internshipList = browserView.getLastResults(s);
+        while (true) {
+            // Display internship list only — no browser menu
+            browserView.showFilteredList(s);
+            List<Internship> internshipList = browserView.getLastResults(s);
 
-        if (internshipList == null || internshipList.isEmpty()) {
-            System.out.println("No internships are currently available.");
-            return;
-        }
+            if (internshipList == null || internshipList.isEmpty()) {
+                System.out.println("No internships are currently available.");
+                return;
+            }
 
-        printInternships(internshipList);
+            int choice = ConsoleUtil.readInt("Select internship index, 0 = cancel: ", 0, internshipList.size());
+            if (choice == 0) {
+                System.out.println("Returning to menu...");
+                return;
+            }
 
-        int choice = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, internshipList.size());
-        if (choice == 0) return;
+            Internship selected = internshipList.get(choice - 1);
 
-        Internship selected = internshipList.get(choice - 1);
-        browserView.printInternshipDetails(selected);
-        try {
-            studentController.applyInternship(s, selected);
-            System.out.println("Application submitted.");
-        } catch (IllegalStateException e) {
-            System.out.println("Unable to apply: " + e.getMessage());
+            // Show details immediately
+            browserView.printInternshipDetails(selected, true);
+
+            if (!confirmAction("Confirm APPLY for this internship? (Y/N): ")) {
+                System.out.println("Cancelled → Returning to internship list...\n");
+                continue; // back to list, NOT back to browser menu
+            }
+
+            try {
+                studentController.applyInternship(s, selected);
+                System.out.println("Application submitted successfully.");
+                return; // done
+            } catch (Exception e) {
+                System.out.println("Unable to apply: " + e.getMessage());
+            }
         }
     }
 
 
-    // private void apply(Student s) {
-    //     List<Internship> internshipList = studentController.getEligibleInternships(s);
-    //     if (internshipList.isEmpty()) {
-    //         System.out.println("No internships are currently available.");
-    //         return;
-    //     }
-
-    //     printInternships(internshipList);
-
-    //     int choice = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, internshipList.size());
-    //     if (choice == 0)
-    //         return;
-        
-    //     Internship selectedInternship = internshipList.get(choice - 1);
-    //     try {
-    //         studentController.applyInternship(s, selectedInternship);
-    //         System.out.println("Internship Application submitted.");
-    //     } catch (IllegalStateException e) {
-    //         System.out.println("Unable to apply: " + e.getMessage());
-    //     }
-    // }
 
     private void accept(Student s) {
-        List<InternshipApplication> applications = studentController.getInternshipApplications(s).stream()
-            .filter(a -> a.getStatus() == InternshipApplication.Status.SUCCESSFUL && !a.studentAccepted()).toList();
-        
-        if (applications.isEmpty()) {
-            System.out.println("No successful Internship Applications available.");
-            return;
-        }
-        printApplications(applications);
 
-        int choice = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, applications.size());
+        while (true) {
+            List<InternshipApplication> applications = studentController.getInternshipApplications(s).stream()
+                    .filter(a -> a.getStatus() == InternshipApplication.Status.SUCCESSFUL && !a.studentAccepted())
+                    .toList();
 
-        if (choice == 0)
-            return;
-        
-        InternshipApplication application = applications.get(choice - 1);
-        Internship internship = studentController.getInternshipById(application.getInternshipId());
+            if (applications.isEmpty()) {
+                System.out.println("No successful internship offers to accept.");
+                return;
+            }
 
-        try {
-            studentController.acceptInternship(s, application, internship);
-            System.out.println("Successfully accepted internship.");
-        } catch (IllegalStateException e) {
-            System.out.println("Error accepting internship: " + e.getMessage());
+            printApplications(applications);
+
+            int choice = ConsoleUtil.readInt("Select index, 0 = cancel: ", 0, applications.size());
+            if (choice == 0) return;
+
+            InternshipApplication selectedApp = applications.get(choice - 1);
+            Internship internship = studentController.getInternshipById(selectedApp.getInternshipId());
+
+            browserView.printInternshipDetails(internship, true);
+
+            if (!confirmAction("Confirm ACCEPT this internship offer? (Y/N): "))
+                continue; // restart selection list
+
+            try {
+                studentController.acceptInternship(s, selectedApp, internship);
+                System.out.println("Internship accepted. All other applications withdrawn.");
+                return;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
+
+
 
     private void withdraw(Student s) {
-        List<InternshipApplication> applications = studentController.getInternshipApplications(s);
-        if (applications.isEmpty()) {
-            System.out.println("No Internship Applications available.");
-            return;
-        } 
-        printApplications(applications);
-        
-        int choice = ConsoleUtil.readInt("Select index, 0 to cancel: ", 0, applications.size());
 
-        if (choice == 0)
-            return;
+        while (true) {
+            List<InternshipApplication> applications = studentController.getInternshipApplications(s);
+            if (applications.isEmpty()) {
+                System.out.println("You have no internship applications.");
+                return;
+            }
 
-        InternshipApplication application = applications.get(choice - 1);
+            printApplications(applications);
 
-        try {
-            studentController.withdrawFromInternship(s, application);
-            System.out.println("Withdrawal request sent.");
-        } catch (IllegalStateException e) {
-            System.out.println("Error sending withdrawal request: " + e.getMessage());
+            int choice = ConsoleUtil.readInt("Select application to withdraw, 0 = cancel: ", 0, applications.size());
+            if (choice == 0) return;
+
+            InternshipApplication app = applications.get(choice - 1);
+            Internship internship = studentController.getInternshipById(app.getInternshipId());
+
+            browserView.printInternshipDetails(internship, true);
+
+            if (!confirmAction("Confirm WITHDRAW request for this application? (Y/N): "))
+                continue; // return to list
+
+            try {
+                studentController.withdrawFromInternship(s, app);
+                System.out.println("✔ Withdrawal request sent to staff.");
+                return;
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
+
 
     private void changePassword(Student s) {
         System.out.print("Please enter new password: ");
@@ -209,4 +222,13 @@ public class StudentMenuView {
         }
     }
 
+    private boolean confirmAction(String message) {
+        while (true) {
+            System.out.print(message);
+            String input = sc.nextLine().trim().toLowerCase();
+            if (input.equals("y")) return true;
+            if (input.equals("n")) return false;
+            System.out.println("Please enter Y or N.");
+        }
+    }
 }

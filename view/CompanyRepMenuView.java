@@ -10,6 +10,7 @@ import controller.CompanyRepController;
 import model.CompanyRepresentative;
 import model.Internship;
 import model.InternshipApplication;
+import model.Student;
 
 public class CompanyRepMenuView {
     private final CompanyRepController companyRepController;
@@ -24,6 +25,7 @@ public class CompanyRepMenuView {
 
     public void displayCompanyRepMenu(CompanyRepresentative rep) {
         while (true) {
+            System.out.println("\n========= Compnay Representative Menu =========");
             System.out.println("1. Create internship opportunity");
             System.out.println("2. View / Filter my internships");
             System.out.println("3. Edit internship");
@@ -34,7 +36,7 @@ public class CompanyRepMenuView {
             System.out.println("8. Change password");
             System.out.println("9. Logout");
 
-            int choice = ConsoleUtil.readInt("Choose: ", 1, 7);
+            int choice = ConsoleUtil.readInt("Choose: ", 1, 9);
 
             switch (choice) {
                 case 1 -> createInternship(rep);
@@ -106,7 +108,7 @@ public class CompanyRepMenuView {
         Internship internship = companyRepController.createInternship(title, desc, internshipLevel, major, openDate, closeDate, rep, slots, false);
 
         System.out.println("Internship created with ID: " + internship.getId() + " (PENDING APPROVAL)");
-        browserView.printInternshipDetails(internship);
+        browserView.printInternshipDetails(internship, false);
     }
 
     private List<Internship> getInternshipList(CompanyRepresentative rep) {
@@ -117,24 +119,32 @@ public class CompanyRepMenuView {
             return internshipList;
         }
 
-        System.out.printf("%-4s %-15s %-22s %-10s %-12s %-12s %-10s%n",
-                "No.", "ID", "Title", "Level", "Status", "Visibility", "Slots");
-        
+        System.out.println("\n==================== Your Internship Listings ====================");
+        System.out.printf("%-4s %-30s %-28s %-12s %-18s %-18s %-12s %-12s %-12s %-10s %-8s%n",
+                "No.", "Title", "Major", "Level", "Company", "Representative",
+                "Open Date", "Close Date", "Status", "Visibility", "Slots");
+
         for (int i = 0; i < internshipList.size(); i++) {
-            Internship internship = internshipList.get(i);
-            System.out.printf("%-4d %-15s %-22s %-10s %-12s %-10s %-10s%n",
+            Internship in = internshipList.get(i);
+            System.out.printf("%-4d %-30s %-28s %-12s %-18s %-18s %-12s %-12s %-12s %-10s %-8s%n",
                     (i + 1),
-                    internship.getId(),
-                    internship.getTitle(),
-                    internship.getLevel(),
-                    internship.getStatus(),
-                    internship.getVisibility(),
-                    internship.getConfirmedSlots() + "/" + internship.getMaxSlots());
+                    in.getTitle(),
+                    in.getMajor(),
+                    in.getLevel(),
+                    in.getCompanyName(),
+                    in.getCr().getName(),
+                    in.getStartDate(),
+                    in.getEndDate(),
+                    in.getStatus(),
+                    (in.getVisibility() ? "Visible" : "Hidden"),
+                    (in.getConfirmedSlots() + "/" + in.getMaxSlots())
+            );
         }
 
         return internshipList;
-        
-    }   
+    }
+
+ 
 
     // private void viewMyInternships(CompanyRepresentative rep) {
     //     getInternshipList(rep);
@@ -225,17 +235,43 @@ public class CompanyRepMenuView {
         System.out.println(pwChanged ? "Password changed." : "You must be logged in to change your password.");
     }
 
+    // private void printApplications(List<InternshipApplication> applications) {
+    //     System.out.printf("%-4s %-15s %-15s %-15s %-12s%n",
+    //             "No.", "Application ID", "Student ID", "Internship ID", "Status");
+
+    //     for (int i = 0; i < applications.size(); i++) {
+    //         InternshipApplication a = applications.get(i);
+    //         System.out.printf("%-4d %-15s %-15s %-15s %-12s%n",
+    //                 (i + 1),
+    //                 a.getId(),
+    //                 a.getStudentId(),
+    //                 a.getInternshipId(),
+    //                 a.getStatus());
+    //     }
+    // }
+
     private void printApplications(List<InternshipApplication> applications) {
-        System.out.printf("%-4s %-15s %-15s %-15s %-12s%n",
-                "No.", "Application ID", "Student ID", "Internship ID", "Status");
+        System.out.printf("%-4s %-35s %-18s %-15s %-18s %-12s%n",
+                "No.", "Internship Title", "Company", "Student ID", "Student Name", "Status");
 
         for (int i = 0; i < applications.size(); i++) {
             InternshipApplication a = applications.get(i);
-            System.out.printf("%-4d %-15s %-15s %-15s %-12s%n",
+
+            // Get internship
+            Internship internship = companyRepController.getInternshipById(a.getInternshipId());
+            String title   = (internship != null) ? internship.getTitle() : "(Deleted)";
+            String company = (internship != null) ? internship.getCompanyName() : "-";
+
+            // Get student
+            Student student = companyRepController.getStudentById(a.getStudentId());
+            String studentName = (student != null) ? student.getName() : "(Unknown)";
+
+            System.out.printf("%-4d %-35s %-18s %-15s %-18s %-12s%n",
                     (i + 1),
-                    a.getId(),
+                    title,
+                    company,
                     a.getStudentId(),
-                    a.getInternshipId(),
+                    studentName,
                     a.getStatus());
         }
     }
@@ -298,60 +334,99 @@ public class CompanyRepMenuView {
     }
 
     private void editInternship(CompanyRepresentative rep) {
-        List<Internship> list = getInternshipList(rep);
-        if (list.isEmpty()) return;
+        while (true) {
+            List<Internship> list = getInternshipList(rep);
+            if (list.isEmpty()) return;
 
-        int index = ConsoleUtil.readInt("Select internship index, 0 to cancel: ", 0, list.size());
-        if (index == 0) return;
+            int index = ConsoleUtil.readInt("Select internship index, 0 to cancel: ", 0, list.size());
+            if (index == 0) return;
 
-        Internship i = list.get(index - 1);
-        browserView.printInternshipDetails(i);
+            Internship original = list.get(index - 1);
 
-        System.out.print("\nNew title (blank = unchanged): ");
-        String title = sc.nextLine().trim();
-        title = title.isEmpty() ? null : title;
+            System.out.println("\n--- Current Details ---");
+            browserView.printInternshipDetails(original, false);
 
-        System.out.print("New description (blank = unchanged): ");
-        String desc = sc.nextLine().trim();
-        desc = desc.isEmpty() ? null : desc;
+            // ─────── Step 1: Gather new data ───────
+            System.out.println("\n--- Enter New Values (blank = unchanged) ---");
 
-        System.out.print("New major (blank = unchanged): ");
-        String major = sc.nextLine().trim();
-        major = major.isEmpty() ? null : major;
+            System.out.print("New title: ");
+            String title = sc.nextLine().trim();
+            title = title.isEmpty() ? original.getTitle() : title;
 
-        System.out.print("Change level? (1=Basic,2=Intermediate,3=Advanced,0=Skip): ");
-        int lvl = ConsoleUtil.readInt("", 0, 3);
-        Internship.Level level = (lvl == 0) ? null : Internship.Level.values()[lvl - 1];
+            System.out.print("New description: ");
+            String desc = sc.nextLine().trim();
+            desc = desc.isEmpty() ? original.getDesc() : desc;
 
-        LocalDate start = promptDate("New start (blank = unchanged): ");
-        LocalDate end = promptDate("New end (blank = unchanged): ");
+            System.out.print("New major: ");
+            String major = sc.nextLine().trim();
+            major = major.isEmpty() ? original.getMajor() : major;
 
-        int slots = ConsoleUtil.readInt("New slots (1-10, 0 = unchanged): ", 0, 10);
-        if (slots == 0) slots = -1;
+            System.out.print("Change level? (1=Basic,2=Intermediate,3=Advanced,0=Skip): ");
+            int lvl = ConsoleUtil.readInt("", 0, 3);
+            Internship.Level level = (lvl == 0) ? original.getLevel() : Internship.Level.values()[lvl - 1];
 
-        try {
-            companyRepController.editInternship(i, title, desc, level, major, start, end, slots);
-            System.out.println("Internship updated.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            LocalDate newStart = promptDate("New start date (yyyy-MM-dd, blank = unchanged): ");
+            LocalDate newEnd   = promptDate("New end date (yyyy-MM-dd, blank = unchanged): ");
+
+            LocalDate start = (newStart == null) ? original.getStartDate() : newStart;
+            LocalDate end   = (newEnd == null) ? original.getEndDate() : newEnd;
+
+            int newSlots = ConsoleUtil.readInt("New slot count (1-10, 0 = unchanged): ", 0, 10);
+            int slots = (newSlots == 0) ? original.getMaxSlots() : newSlots;
+
+            // ─────── Step 2: Display preview ───────
+            System.out.println("\n=========== PREVIEW CHANGES ===========");
+            System.out.printf("%-20s | %-20s -> %-20s%n", "Title", original.getTitle(), title);
+            System.out.printf("%-20s | %-20s -> %-20s%n", "Description", truncate(original.getDesc()), truncate(desc));
+            System.out.printf("%-20s | %-20s -> %-20s%n", "Major", original.getMajor(), major);
+            System.out.printf("%-20s | %-20s -> %-20s%n", "Level", original.getLevel(), level);
+            System.out.printf("%-20s | %-20s -> %-20s%n", "Start Date", original.getStartDate(), start);
+            System.out.printf("%-20s | %-20s -> %-20s%n", "End Date", original.getEndDate(), end);
+            System.out.printf("%-20s | %-20d -> %-20d%n", "Slots", original.getMaxSlots(), slots);
+            System.out.println("========================================");
+
+            // ─────── Step 3: Confirm or redo ───────
+            if (confirmAction("Apply these changes? (Y/N): ")) {
+                try {
+                    companyRepController.editInternship(original, title, desc, level, major, start, end, slots);
+                    System.out.println("Internship updated successfully!");
+                    return;
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                    return;
+                }
+            } else {
+                System.out.println("Re-entering edit menu...");
+                // Loop continues - no return needed
+            }
         }
     }
 
+
     private void deleteInternship(CompanyRepresentative rep) {
-        List<Internship> list = getInternshipList(rep);
-        if (list.isEmpty()) return;
+        while (true) {
+            List<Internship> list = getInternshipList(rep);
+            if (list.isEmpty()) return;
 
-        int index = ConsoleUtil.readInt("Select internship index, 0 to cancel: ", 0, list.size());
-        if (index == 0) return;
+            int index = ConsoleUtil.readInt("Select internship index, 0 to cancel: ", 0, list.size());
+            if (index == 0) return;
 
-        Internship i = list.get(index - 1);
-        browserView.printInternshipDetails(i);
+            Internship i = list.get(index - 1);
+            browserView.printInternshipDetails(i, false);
 
-        try {
-            companyRepController.deleteInternship(i);
-            System.out.println("Internship deleted.");
-        } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            if (confirmAction("Are you sure you want to DELETE this internship? (Y/N): ")) {
+                try {
+                    companyRepController.deleteInternship(i);
+                    System.out.println("Internship deleted successfully!");
+                    return;
+                } catch (Exception e) {
+                    System.out.println("Error: " + e.getMessage());
+                    return;
+                }
+            } else {
+                System.out.println("Returning to internship selection...");
+                // Continue loop
+            }
         }
     }
 
@@ -376,6 +451,19 @@ public class CompanyRepMenuView {
             } catch (DateTimeParseException e) {
                 System.out.println("Invalid date format! Use yyyy-MM-dd.");
             }
+        }
+    }
+    private String truncate(String s) {
+        return (s.length() > 18) ? s.substring(0, 15) + "..." : s;
+    }
+
+    private boolean confirmAction(String message) {
+        while (true) {
+            System.out.print(message);
+            String input = sc.nextLine().trim().toLowerCase();
+            if (input.equals("y")) return true;
+            if (input.equals("n")) return false;
+            System.out.println("Please enter Y or N.");
         }
     }
 
