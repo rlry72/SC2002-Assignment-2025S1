@@ -33,6 +33,7 @@ public class StudentController {
             .filter(i -> i.getStatus() == Internship.Status.APPROVED)
             .filter(Internship::getVisibility)
             .filter(i -> i.isOpen(currDate))
+            .filter(i -> i.getMajor().equalsIgnoreCase(s.getMajor()))
             .filter(i -> isLevelAllowed(s, i))
             .sorted(Comparator.comparing(Internship::getTitle))
             .toList();
@@ -45,6 +46,7 @@ public class StudentController {
             .filter(i -> i.getStatus() == Internship.Status.APPROVED)
             .filter(Internship::getVisibility)
             .filter(i -> i.isOpen(today))
+            .filter(i -> i.getMajor().equalsIgnoreCase(s.getMajor()))
             .filter(i -> isLevelAllowed(s, i))
             .sorted(Comparator.comparing(Internship::getTitle))
             .toList();
@@ -101,7 +103,7 @@ public class StudentController {
         internshipApplication.accept();
         applications.save(internshipApplication);
 
-        internship.addConfirmedSlot();
+        internship.addConfirmedSlot();  
         internships.save(internship);
 
         // Withdraw all other apps
