@@ -39,33 +39,4 @@ public class Staff extends User {
     public String getLoginId() {
         return super.getEmail();
     }
-
-    // // might be replaced with more secure system if possible
-    // @Override
-    // public void login() {
-    //     boolean loginSuccess = false;
-    //     String staffId;
-    //     String password;
-
-    //     Scanner sc = new Scanner(System.in);
-    //     System.out.println("Staff Login");
-    //     do {
-    //         System.out.print("Please enter Staff ID: ");
-    //         staffId = sc.nextLine();
-    //         System.out.print("Please enter your password: ");
-    //         password = sc.nextLine();
-    //         if (checkLoginInfo(staffId, password)) {
-    //             loginSuccess = true;            
-    //             super.setLoggedIn(loginSuccess);
-    //         }
-    //     } while (loginSuccess == false);
-        
-    // }
-
-    // public boolean checkLoginInfo(String staffId, String password) {
-    //     if (staffId.equals(this.getUserId()) && this.validatePassword(password))
-    //         return true;
-    //     else
-    //         return false;
-    // }
 }
