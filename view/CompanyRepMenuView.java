@@ -305,8 +305,9 @@ public class CompanyRepMenuView {
         if (index == 0) return;
 
         Internship i = list.get(index - 1);
+        browserView.printInternshipDetails(i);
 
-        System.out.print("New title (blank = unchanged): ");
+        System.out.print("\nNew title (blank = unchanged): ");
         String title = sc.nextLine().trim();
         title = title.isEmpty() ? null : title;
 
@@ -344,6 +345,7 @@ public class CompanyRepMenuView {
         if (index == 0) return;
 
         Internship i = list.get(index - 1);
+        browserView.printInternshipDetails(i);
 
         try {
             companyRepController.deleteInternship(i);
