@@ -18,3 +18,4 @@ However, due to the complexity of the main diagram, I have broken it down into s
 - Entity classes
 - Repository classes
 - Controller classes
+- There is also a main class digram showing all the packages and how they work together
