@@ -4,5 +4,5 @@ The Internship Placement Management System(IPMS) is a Java application designed 
 ### Run instructions:
 Run the following command in terminal in src folder to start the application.
 ```
-java -cp bin app.Main
+for /R %f in (*.java) do javac -d bin "%f" && java -cp bin app.Main
 ```
